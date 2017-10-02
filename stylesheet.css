@@ -1,0 +1,28 @@
+/* JUST FOR THIS DEMO */
+html,body{ height:100%; width:100%; }
+body{ background:#4A90E2; align-items:center; }
+
+.summaryStats{
+  padding:10px;
+  width:50%;
+  margin:50px auto;
+  background: #FFFFFF;
+  border-radius:6px;
+  box-shadow:2px 2px 8px rgba(0,0,0,.3);
+  border:0;
+  font-size:14px;
+}
+
+textarea{
+  display:block;
+  box-sizing: padding-box;
+  overflow:hidden;
+  padding:10px;
+  width:50%;
+  height: 50%;
+  font-size:14px;
+  margin:50px auto;
+  border-radius:6px;
+  box-shadow:2px 2px 8px rgba(0,0,0,.3);
+  border:0;
+}

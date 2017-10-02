@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Eloquate</title>
+  <link rel="stylesheet" href="stylesheet.css" type="text/css">
+
+  </head>
+  <body>
+    <div class="summaryStats">
+      <h2>Summary Statistics:</h2>
+      <p> Word frequency max: 5</p>
+      <p id="word_count">Word Count: 0</p>
+      <p>Most Frequent:</p>
+      <p id="most_frequent"></p>
+      <p>Ignored words:</p>
+      <p id="stop_words"></p>
+    </div>
+    <textarea class='autoExpand' rows='3' data-min-rows='3'
+    placeholder='Auto-Expanding Textarea'></textarea>
+  </body>
+
+  <script type="text/javascript" src="./node_modules/jquery/dist/jquery.js"></script>
+  <script type='text/javascript' src="./textAnalyzer.js"></script>
+  <script type='text/javascript' src="./node_modules/blast-text/jquery.blast.js"></script>
+  <script type="text/javascript" src="./index.js"></script>
+</html>
