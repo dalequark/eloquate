@@ -4,7 +4,8 @@
   "description": "Interface for detecting writing issues.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "webpack --watch"
   },
   "author": "",
   "license": "ISC",
