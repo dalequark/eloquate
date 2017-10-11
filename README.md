@@ -1,1 +1,1 @@
-Simple web page for analyzing text for word usage, useful for fledging writers.
+Simple web page for analyzing text for word usage, useful for fledgling writers.
