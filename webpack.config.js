@@ -1,7 +1,7 @@
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'bundle.js'
+    filename: './dist/bundle.js'
   },
-  devtool: 'source-map'
+  devtool: './dist/source-map'
 }

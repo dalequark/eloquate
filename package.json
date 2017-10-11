@@ -9,9 +9,11 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "blast-text": "git+https://github.com/dalequark/blast.git",
+    "jquery": "^3.2.1"
+  },
   "devDependencies": {
-    "jquery": "^3.2.1",
-    "jquery-ui": "^1.12.1",
     "webpack": "^3.6.0"
   }
 }

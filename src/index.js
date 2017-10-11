@@ -1,27 +1,9 @@
 import TextAnalysis from './textanalyzer';
 import $ from 'jquery';
 import blast from 'blast-text';
-//import * as $ from 'blast-text';
 
 
 const min_freq = 2;
-
-
-// From https://codepen.io/vsync/pen/frudD
-// Applied globally on all textareas with the "autoExpand" class
-$(document)
-.one('focus.autoExpand', 'textarea.autoExpand', function(){
-  let savedValue = this.value;
-  this.value = '';
-  this.baseScrollHeight = this.scrollHeight;
-  this.value = savedValue;
-})
-.on('input.autoExpand', 'textarea.autoExpand', function(){
-  let minRows = this.getAttribute('data-min-rows')|0, rows;
-  this.rows = minRows;
-  rows = Math.ceil((this.scrollHeight - this.baseScrollHeight) / 17);
-  this.rows = minRows + rows;
-});
 
 var info;
 updateStats();
@@ -52,7 +34,6 @@ function updateStops(stops) {
 }
 
 function updateStats() {
-
   let text = $('#text_input')[0].innerText;
   info = new TextAnalysis(text);
 
