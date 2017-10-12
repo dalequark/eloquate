@@ -11,7 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "blast-text": "git+https://github.com/dalequark/blast.git",
-    "jquery": "^3.2.1"
+    "jquery": "^3.2.1",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "mocha": "^4.0.1",

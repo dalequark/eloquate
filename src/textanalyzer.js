@@ -58,13 +58,17 @@ module.exports = function TextAnalysis(input_text) {
 
   this.wordCount = () => { return tokens.length; }
 
-  this.getFrequency = (word) => {
-    return this.frequencies[word].count || 0;
-  }
+  this.wordAtIndex = (index) => { return tokens[index]; }
 
   this.wordsOverFrequency =  (limit = 4) => {
     return Object.keys(this.frequencies)
     .filter( word => this.frequencies[word].count >= limit);
+  }
+
+  this.getFrequency = (word) => { return this.frequencies[word].count || 0}
+  
+  this.getIndices = (word) => {
+    return this.frequencies[word].indices || [];
   }
 
   // Returns indices of words repeated under distance
