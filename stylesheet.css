@@ -47,7 +47,7 @@ html,body{
 /* Font styles from Medium */
 #text_input {
   overflow:scroll;
-  width: 60%;
+  width: 65%;
   font-size: 21px;
   line-height: 1.58;
   letter-spacing: -.003em;
@@ -67,7 +67,7 @@ html,body{
 }
 #summary_statistics {
   float: right;
-  width: 40%;
+  width: 35%;
   height: 100%;
 }
 
