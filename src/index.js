@@ -5,10 +5,11 @@ import _ from 'lodash';
 
 
 const min_freq = 2;
+const debounce = 40;
 
 var info;
 let issue_queue = [];
-updateStats();
+update();
 
 // Update the stop words list
 updateStops(info.getStops());
@@ -16,19 +17,15 @@ updateStops(info.getStops());
 
 /* ----- */
 
-// update list of words or indices with color
-function colorWords(words, color='red') {
-  $('#text_input').blast({
-    delimiter: 'word',
-    generateValueClass: true,
-    returnGenerated: false
-  });
+// update list of words or indices with class
+function colorWords(words, class_name) {
+
   words.forEach((word) => {
     // if we're given a word, highlight by word. If number, highlight by
     // index
     let selector = typeof(word) == 'string' ? "#text_input .blast-word-" +
     CSS.escape(word) : '#text_input span:nth-child(' + (word + 1) + ')';
-    $(selector).css('color', color);
+    $(selector).addClass(class_name);
   });
 
 }
@@ -37,7 +34,14 @@ function updateStops(stops) {
   if(stops) $('#stop_words').text(stops.join(', '));
 }
 
-function updateStats() {
+function update() {
+
+  $('#text_input').blast({
+    delimiter: 'word',
+    generateValueClass: true,
+    returnGenerated: false
+  });
+
   let text = $('#text_input')[0].innerText;
   info = new TextAnalysis(text);
 
@@ -47,12 +51,12 @@ function updateStats() {
 
   // add frequency errors to the error queue
   issue_queue = _.map(most_frequent, (word) => {
-      return {
-        "message" : ("Word '" + word + "' was used " +
-        info.getFrequency(word) + " times."),
-        "indices" : info.getIndices(word)
-      }
-    });
+    return {
+      "message" : ("'" + word + "' was used " +
+      info.getFrequency(word) + " times."),
+      "indices" : info.getIndices(word)
+    }
+  });
 
   let too_close = info.repeatsUnderDistance(3);
 
@@ -70,18 +74,11 @@ function updateStats() {
 
   // Update visuals
 
-  let frequent_str = "";
-  most_frequent.forEach(function(word) {
-    frequent_str += "(\"" + word + "\", " +
-    info.getFrequency(word) + ") ";
-  });
-  $("#most_frequent").text(frequent_str);
-  colorWords(most_frequent);
-  colorWords(_.flatten(too_close), 'blue');
+  colorWords(most_frequent, 'frequent');
+  colorWords(_.flatten(too_close), 'too_close');
 
   issue_queue.forEach((issue) => {
-    $("#issue_queue").append("<p>" + issue['message'] + "</p>");
-    console.log(issue['message']);
+    $("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
   });
 
 }
@@ -90,5 +87,5 @@ function updateStats() {
 let timeout;
 $("#text_input").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(updateStats, 1000);
+  timeout = setTimeout(update, debounce);
 });

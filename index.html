@@ -6,21 +6,25 @@
   <link rel="stylesheet" href="stylesheet.css" type="text/css">
   </head>
   <body>
-    <div class="summaryStats">
+    <div id="summary_statistics" class="simple_box">
+      <h2>Config<h2>
+      <div id="config">
+        <div class="config_item" id="# repeats" contenteditable="true">5</div>
+        <div class="config_item"
+          id="distance between repeats"
+          contenteditable="true" >10</div>
+        <div id="stop_words" contenteditable="true"></div>
+      </div>
       <h2>Summary Statistics:</h2>
       <p id="word_count">Word Count: 0</p>
-      <p>Most Frequent:</p>
-      <p id="most_frequent"></p>
-      <p>Ignored words:</p>
-      <p id="stop_words"></p>
-    </div>
-    <div id='issue_queue'>
-      <h2>Issues:</h2>
+      <div id='issue_queue'>
+        <h2>Issues:</h2>
+      </div>
     </div>
 
 
-  <div id="text_input" contenteditable="true">
-    <p>Here's a typical paragraph element</p>
+  <div id="text_input" class="simple_box" contenteditable="true">
+    Write/Paste/Type here!
   </div>
 
   </body>

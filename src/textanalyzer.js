@@ -1,7 +1,7 @@
-module.exports = function TextAnalysis(input_text) {
+import stop_words from './stopwords';
 
-  let stop_words =
-  ['she', 'he', 'the', 'a', 'and', 'but', 'when', 'I', 'they'];
+export default function TextAnalysis(input_text) {
+
   let freq_dict = {};
 
   // Keep track of distance between last word usage
@@ -24,7 +24,7 @@ module.exports = function TextAnalysis(input_text) {
       return;
     }
 
-    freq_info = freq_dict[word];
+    let freq_info = freq_dict[word];
 
     freq_info['count'] += 1;
 
@@ -66,7 +66,7 @@ module.exports = function TextAnalysis(input_text) {
   }
 
   this.getFrequency = (word) => { return this.frequencies[word].count || 0}
-  
+
   this.getIndices = (word) => {
     return this.frequencies[word].indices || [];
   }

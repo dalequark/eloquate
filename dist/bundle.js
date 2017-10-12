@@ -70,7 +70,6 @@
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__textanalyzer__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__textanalyzer___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_blast_text__ = __webpack_require__(2);
@@ -84,10 +83,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 const min_freq = 2;
+const debounce = 40;
 
 var info;
 let issue_queue = [];
-updateStats();
+update();
 
 // Update the stop words list
 updateStops(info.getStops());
@@ -95,19 +95,15 @@ updateStops(info.getStops());
 
 /* ----- */
 
-// update list of words or indices with color
-function colorWords(words, color='red') {
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
-    delimiter: 'word',
-    generateValueClass: true,
-    returnGenerated: false
-  });
+// update list of words or indices with class
+function colorWords(words, class_name) {
+
   words.forEach((word) => {
     // if we're given a word, highlight by word. If number, highlight by
     // index
     let selector = typeof(word) == 'string' ? "#text_input .blast-word-" +
     CSS.escape(word) : '#text_input span:nth-child(' + (word + 1) + ')';
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()(selector).css('color', color);
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()(selector).addClass(class_name);
   });
 
 }
@@ -116,9 +112,16 @@ function updateStops(stops) {
   if(stops) __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(stops.join(', '));
 }
 
-function updateStats() {
+function update() {
+
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
+    delimiter: 'word',
+    generateValueClass: true,
+    returnGenerated: false
+  });
+
   let text = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input')[0].innerText;
-  info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer___default.a(text);
+  info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */](text);
 
   __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#word_count').text("Word Count: " + info.wordCount());
 
@@ -126,12 +129,12 @@ function updateStats() {
 
   // add frequency errors to the error queue
   issue_queue = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(most_frequent, (word) => {
-      return {
-        "message" : ("Word '" + word + "' was used " +
-        info.getFrequency(word) + " times."),
-        "indices" : info.getIndices(word)
-      }
-    });
+    return {
+      "message" : ("'" + word + "' was used " +
+      info.getFrequency(word) + " times."),
+      "indices" : info.getIndices(word)
+    }
+  });
 
   let too_close = info.repeatsUnderDistance(3);
 
@@ -149,18 +152,11 @@ function updateStats() {
 
   // Update visuals
 
-  let frequent_str = "";
-  most_frequent.forEach(function(word) {
-    frequent_str += "(\"" + word + "\", " +
-    info.getFrequency(word) + ") ";
-  });
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#most_frequent").text(frequent_str);
-  colorWords(most_frequent);
-  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(too_close), 'blue');
+  colorWords(most_frequent, 'frequent');
+  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(too_close), 'too_close');
 
   issue_queue.forEach((issue) => {
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").append("<p>" + issue['message'] + "</p>");
-    console.log(issue['message']);
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
   });
 
 }
@@ -169,18 +165,22 @@ function updateStats() {
 let timeout;
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(updateStats, 1000);
+  timeout = setTimeout(update, debounce);
 });
 
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-module.exports = function TextAnalysis(input_text) {
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = TextAnalysis;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__stopwords__);
 
-  let stop_words =
-  ['she', 'he', 'the', 'a', 'and', 'but', 'when', 'I', 'they'];
+
+function TextAnalysis(input_text) {
+
   let freq_dict = {};
 
   // Keep track of distance between last word usage
@@ -196,14 +196,14 @@ module.exports = function TextAnalysis(input_text) {
 
   tokens.forEach(function(word, word_index) {
 
-    if(stop_words.indexOf(word) >= 0 || word.length < 1)  return;
+    if(__WEBPACK_IMPORTED_MODULE_0__stopwords___default.a.indexOf(word) >= 0 || word.length < 1)  return;
 
     if(!freq_dict[word]) {
       freq_dict[word] = {'count' : 1, 'indices' : [word_index]};
       return;
     }
 
-    freq_info = freq_dict[word];
+    let freq_info = freq_dict[word];
 
     freq_info['count'] += 1;
 
@@ -232,7 +232,7 @@ module.exports = function TextAnalysis(input_text) {
   // Dictionary of distance_between_last_usage => index of all repeated words
   this.repeat_distances = repeat_dists;
 
-  this.getStops = () => { return stop_words; }
+  this.getStops = () => { return __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a; }
   this.setStops = (words) => { stop_words = words; return stops; }
 
   this.wordCount = () => { return tokens.length; }
@@ -245,7 +245,7 @@ module.exports = function TextAnalysis(input_text) {
   }
 
   this.getFrequency = (word) => { return this.frequencies[word].count || 0}
-  
+
   this.getIndices = (word) => {
     return this.frequencies[word].indices || [];
   }
@@ -28157,6 +28157,190 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 7 */,
+/* 8 */
+/***/ (function(module, exports) {
+
+// Courtesy https://github.com/Alir3z4/stop-words/blob/master/english.txt
+
+module.exports =
+['a',
+ 'about',
+ 'above',
+ 'after',
+ 'again',
+ 'against',
+ 'all',
+ 'am',
+ 'an',
+ 'and',
+ 'any',
+ 'are',
+ "aren't",
+ 'as',
+ 'at',
+ 'be',
+ 'because',
+ 'been',
+ 'before',
+ 'being',
+ 'below',
+ 'between',
+ 'both',
+ 'but',
+ 'by',
+ "can't",
+ 'cannot',
+ 'could',
+ "couldn't",
+ 'did',
+ "didn't",
+ 'do',
+ 'does',
+ "doesn't",
+ 'doing',
+ "don't",
+ 'down',
+ 'during',
+ 'each',
+ 'few',
+ 'for',
+ 'from',
+ 'further',
+ 'had',
+ "hadn't",
+ 'has',
+ "hasn't",
+ 'have',
+ "haven't",
+ 'having',
+ 'he',
+ "he'd",
+ "he'll",
+ "he's",
+ 'her',
+ 'here',
+ "here's",
+ 'hers',
+ 'herself',
+ 'him',
+ 'himself',
+ 'his',
+ 'how',
+ "how's",
+ 'i',
+ "i'd",
+ "i'll",
+ "i'm",
+ "i've",
+ 'if',
+ 'in',
+ 'into',
+ 'is',
+ "isn't",
+ 'it',
+ "it's",
+ 'its',
+ 'itself',
+ "let's",
+ 'me',
+ 'more',
+ 'most',
+ "mustn't",
+ 'my',
+ 'myself',
+ 'no',
+ 'nor',
+ 'not',
+ 'of',
+ 'off',
+ 'on',
+ 'once',
+ 'only',
+ 'or',
+ 'other',
+ 'ought',
+ 'our',
+ 'ours',
+ 'ourselves',
+ 'out',
+ 'over',
+ 'own',
+ 'same',
+ "shan't",
+ 'she',
+ "she'd",
+ "she'll",
+ "she's",
+ 'should',
+ "shouldn't",
+ 'so',
+ 'some',
+ 'such',
+ 'than',
+ 'that',
+ "that's",
+ 'the',
+ 'their',
+ 'theirs',
+ 'them',
+ 'themselves',
+ 'then',
+ 'there',
+ "there's",
+ 'these',
+ 'they',
+ "they'd",
+ "they'll",
+ "they're",
+ "they've",
+ 'this',
+ 'those',
+ 'through',
+ 'to',
+ 'too',
+ 'under',
+ 'until',
+ 'up',
+ 'very',
+ 'was',
+ "wasn't",
+ 'we',
+ "we'd",
+ "we'll",
+ "we're",
+ "we've",
+ 'were',
+ "weren't",
+ 'what',
+ "what's",
+ 'when',
+ "when's",
+ 'where',
+ "where's",
+ 'which',
+ 'while',
+ 'who',
+ "who's",
+ 'whom',
+ 'why',
+ "why's",
+ 'with',
+ "won't",
+ 'would',
+ "wouldn't",
+ 'you',
+ "you'd",
+ "you'll",
+ "you're",
+ "you've",
+ 'your',
+ 'yours',
+ 'yourself',
+ 'yourselves']
 
 
 /***/ })

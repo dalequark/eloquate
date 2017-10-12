@@ -1,29 +1,50 @@
 /* JUST FOR THIS DEMO */
-html,body{ height:100%; width:100%; }
-body{ background:#4A90E2; align-items:center; }
-
-.summaryStats{
-  padding:10px;
-  width:50%;
-  margin:50px auto;
-  background: #FFFFFF;
-  border-radius:6px;
-  box-shadow:2px 2px 8px rgba(0,0,0,.3);
-  border:0;
-  font-size:14px;
+html,body{
+  height:100%;
+  width:100%;
+  font-family: 'Helvetica';
 }
 
-#text_input{
-  display:block;
-  box-sizing: padding-box;
+.simple_box {
+  height: 100%;
+  outline-style: solid;
+  padding: 20px;
+  box-sizing: border-box;
+  font-size: 10px;
+}
+
+.frequent {
+    color: #ef7c7c;
+    font-weight: bold;
+}
+
+.too_close {
+  color: #a4affb;
+  font-weight: bold;
+}
+
+.issue {
+  outline-style: solid;
+}
+
+#text_input {
   overflow:hidden;
-  padding:10px;
-  width:50%;
-  height: 60%;
-  font-size:14px;
-  margin:50px auto;
-  border-radius:6px;
-  box-shadow:2px 2px 8px rgba(0,0,0,.3);
-  border:0;
-  background: #FFFFFF;
+  width: 60%;
+  font-size: 16px;
+}
+
+#summary_statistics {
+  float: right;
+  width: 40%;
+  height: 100%;
+}
+
+#stop_words {
+  overflow: scroll;
+  height: 50px;
+}
+
+#issue_queue {
+  overflow: scroll;
+  height:50%;
 }
