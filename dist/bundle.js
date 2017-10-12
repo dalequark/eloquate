@@ -83,7 +83,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 const min_freq = 2;
-const debounce = 40;
+const debounce = 1000;
 
 var info;
 let issue_queue = [];

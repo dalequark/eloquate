@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 
 const min_freq = 2;
-const debounce = 40;
+const debounce = 1000;
 
 var info;
 let issue_queue = [];
