@@ -3,15 +3,14 @@ html,body{
   height:100%;
   width:100%;
   font-weight: normal;
-  font-family: medium-content-serif-font, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-family: medium-content-sans-serif-font,"Lucida Grande",
+  "Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif!important;
   font-size: 14px;
-  outline-style: solid;
 }
 
 .simple_box {
   height: 100%;
-  outline-style: solid;
-  padding: 20px;
+  padding: 28px;
   box-sizing: border-box;
 }
 
@@ -26,8 +25,8 @@ html,body{
 }
 
 .issue {
-  outline-style: solid;
-  box-sizing: border-box;
+  border-bottom: 1px solid;
+  height: 30px;
 }
 
 .label {
@@ -35,6 +34,7 @@ html,body{
   width: 30%;
   padding: 2px;
   box-sizing: border-box;
+  font-weight: bold;
 }
 
 .config_item {
@@ -44,12 +44,27 @@ html,body{
   float:right;
 }
 
+/* Font styles from Medium */
 #text_input {
   overflow:scroll;
   width: 60%;
-  font-size: 16px;
+  font-size: 21px;
+  line-height: 1.58;
+  letter-spacing: -.003em;
+  font-family: medium-content-serif-font, Georgia, Cambria,
+  "Times New Roman", Times, serif;
+  box-sizing: border-box;
+  border-right: 2px dotted #000;
 }
 
+#config {
+  background-color:#eaeaea;
+  box-sizing: border-box;
+  margin-top: 10px;
+  mragin-bottom: 10px;
+  padding: 10px;
+  display: none;
+}
 #summary_statistics {
   float: right;
   width: 40%;

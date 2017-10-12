@@ -157,7 +157,6 @@ function runAnalysis() {
       }
     })
   );
-    console.log(issue_queue);
 }
 
 function updateView() {
@@ -188,6 +187,10 @@ function update() {
 
 }
 
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config_button").on("click", function() {
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config").toggle();
+});
+
 // Let the timeout wait for you to finish typing
 let timeout;
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", function() {
@@ -198,13 +201,13 @@ __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", functi
 // Also check for user-input parameters
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#min_freq").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(update, 5000);
+  timeout = setTimeout(update, debounce);
 });
 
 // Also check for user-input parameters
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(update, 5000);
+  timeout = setTimeout(update, debounce);
 });
 
 

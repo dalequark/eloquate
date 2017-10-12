@@ -79,7 +79,6 @@ function runAnalysis() {
       }
     })
   );
-    console.log(issue_queue);
 }
 
 function updateView() {
@@ -110,6 +109,10 @@ function update() {
 
 }
 
+$("#config_button").on("click", function() {
+  $("#config").toggle();
+});
+
 // Let the timeout wait for you to finish typing
 let timeout;
 $("#text_input").on("input", function() {
@@ -120,11 +123,11 @@ $("#text_input").on("input", function() {
 // Also check for user-input parameters
 $("#min_freq").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(update, 5000);
+  timeout = setTimeout(update, debounce);
 });
 
 // Also check for user-input parameters
 $("#repeat_distance").on("input", function() {
   clearTimeout(timeout);
-  timeout = setTimeout(update, 5000);
+  timeout = setTimeout(update, debounce);
 });

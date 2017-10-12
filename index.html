@@ -7,23 +7,24 @@
   </head>
   <body>
     <div id="summary_statistics" class="simple_box">
-      <h2>Config</h2>
-      <div id="config">
-        <div class="label"># Repeats</div>
-        <div class="config_item" id="min_freq" contenteditable="true">5</div>
-        <div class="label">Repeat Distance</div>
-        <div class="config_item"
-          id="repeat_distance"
-          contenteditable="true" >10</div>
 
-        <div class="label">Stop Words</div>
-        <div id="stop_words" contenteditable="true"></div>
+      <h2>Summary</h2>
+        <button id="config_button" class="accordian">Configuration Options</button>
+        <div id="config">
+          <div class="label"># Repeats</div>
+          <div class="config_item" id="min_freq" contenteditable="true">5</div>
+          <div class="label">Repeat Distance</div>
+          <div class="config_item"
+            id="repeat_distance"
+            contenteditable="true" >10</div>
 
-      </div>
-      <h2>Summary Statistics:</h2>
-      <p id="word_count">Word Count: 0</p>
-      <h2>Issues:</h2>
-      <div id='issue_queue'>
+          <div class="label">Stop Words</div>
+          <div id="stop_words" contenteditable="true"></div>
+        </div>
+
+        <p id="word_count">Word Count: 0</p>
+        <p>Issues:</p>
+        <div id='issue_queue'>
       </div>
     </div>
 
