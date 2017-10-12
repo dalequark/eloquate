@@ -15,14 +15,14 @@ html,body{
   box-sizing: border-box;
 }
 
-.frequent {
-    color: #ef7c7c;
-    font-weight: bold;
-}
-
 .too_close {
   color: #a4affb;
   font-weight: bold;
+}
+
+.frequent {
+    color: #ef7c7c;
+    font-weight: bold;
 }
 
 .issue {

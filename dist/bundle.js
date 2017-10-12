@@ -81,12 +81,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-
-const min_freq = 2;
 const debounce = 1000;
+const default_min_freq = 5;
+const default_repeat_distance = 5;
 
-var info;
+let info;
 let issue_queue = [];
+let min_freq, repeat_distance;
+
 update();
 
 // Update the stop words list
@@ -112,19 +114,25 @@ function updateStops(stops) {
   if(stops) __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(stops.join(', '));
 }
 
-function update() {
+function updateUserParams() {
+  min_freq = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq')[0].innerText);
+  repeat_distance = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance')[0].innerText);
 
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
-    delimiter: 'word',
-    generateValueClass: true,
-    returnGenerated: false
-  });
+  if(!min_freq || min_freq < 0) {
+    alert("# Repeats must be a number > 0!");
+    min_freq = default_min_freq;
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq').text(min_freq);
+  }
+  if(!repeat_distance || repeat_distance < 0) {
+    alert("# Repeats must be a number > 0!");
+    repeat_distance = default_repeat_distance;
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance').text(repeat_distance);
+  }
+}
 
+function runAnalysis() {
   let text = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input')[0].innerText;
   info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */](text);
-
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#word_count').text("Word Count: " + info.wordCount());
-
   let most_frequent = info.wordsOverFrequency(min_freq);
 
   // add frequency errors to the error queue
@@ -136,7 +144,7 @@ function update() {
     }
   });
 
-  let too_close = info.repeatsUnderDistance(3);
+  let too_close = info.repeatsUnderDistance(repeat_distance);
 
   // add frequency errors to the error queue
   issue_queue = issue_queue.concat(
@@ -149,15 +157,34 @@ function update() {
       }
     })
   );
+    console.log(issue_queue);
+}
 
-  // Update visuals
+function updateView() {
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
+    delimiter: 'word',
+    generateValueClass: true,
+    returnGenerated: false
+  });
 
-  colorWords(most_frequent, 'frequent');
-  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(too_close), 'too_close');
+  // to do: don't calculate wordsOverFrequency twice, instead use a sort
+  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(info.repeatsUnderDistance(repeat_distance)), 'too_close');
+  colorWords(info.wordsOverFrequency(min_freq), 'frequent');
 
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#word_count').text("Word Count: " + info.wordCount());
+
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").empty();
   issue_queue.forEach((issue) => {
     __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
   });
+}
+
+function update() {
+
+  // this must be called to get user-defined parameters
+  updateUserParams();
+  runAnalysis();
+  updateView();
 
 }
 
@@ -166,6 +193,18 @@ let timeout;
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
+});
+
+// Also check for user-input parameters
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#min_freq").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, 5000);
+});
+
+// Also check for user-input parameters
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, 5000);
 });
 
 
