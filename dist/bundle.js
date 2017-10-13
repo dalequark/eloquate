@@ -89,17 +89,19 @@ let info;
 let issue_queue = [];
 let min_freq, repeat_distance;
 
-update();
+/* Initially, load stops from file, if they exist */
+console.log(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words);
+if(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.length) {
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.join(', '));
+}
 
-// Update the stop words list
-updateStops(info.getStops());
+update();
 
 
 /* ----- */
 
 // update list of words or indices with class
 function colorWords(words, class_name) {
-
   words.forEach((word) => {
     // if we're given a word, highlight by word. If number, highlight by
     // index
@@ -110,8 +112,13 @@ function colorWords(words, class_name) {
 
 }
 
-function updateStops(stops) {
-  if(stops) __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(stops.join(', '));
+function updateStops() {
+  let stops = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words')[0].innerText;
+  stops = stops.split(',');
+  stops = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(stops, (word) => {
+    return word.trim().toLowerCase();
+  });
+  info.setStops(stops);
 }
 
 function updateUserParams() {
@@ -128,9 +135,11 @@ function updateUserParams() {
     repeat_distance = default_repeat_distance;
     __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance').text(repeat_distance);
   }
+  updateStops();
 }
 
 function runAnalysis() {
+
   let text = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input')[0].innerText;
   info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */](text);
   let most_frequent = info.wordsOverFrequency(min_freq);
@@ -181,8 +190,8 @@ function updateView() {
 function update() {
 
   // this must be called to get user-defined parameters
-  updateUserParams();
   runAnalysis();
+  updateUserParams();
   updateView();
 
 }
@@ -199,13 +208,18 @@ __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", functi
 });
 
 // Also check for user-input parameters
+
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#min_freq").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
 });
 
-// Also check for user-input parameters
 __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#stop_words").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
 });
@@ -221,6 +235,7 @@ __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", f
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__stopwords__);
 
 
+// Todo: why can't I export a static method?
 function TextAnalysis(input_text) {
 
   let freq_dict = {};
@@ -238,7 +253,7 @@ function TextAnalysis(input_text) {
 
   tokens.forEach(function(word, word_index) {
 
-    if(__WEBPACK_IMPORTED_MODULE_0__stopwords___default.a.indexOf(word) >= 0 || word.length < 1)  return;
+    if(word.length < 1)  return;
 
     if(!freq_dict[word]) {
       freq_dict[word] = {'count' : 1, 'indices' : [word_index]};
@@ -268,14 +283,16 @@ function TextAnalysis(input_text) {
   /* ------------------------------------------------------------------------*/
 
   this.tokens = tokens;
+  this.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
 
   this.frequencies = freq_dict;
 
   // Dictionary of distance_between_last_usage => index of all repeated words
   this.repeat_distances = repeat_dists;
 
-  this.getStops = () => { return __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a; }
-  this.setStops = (words) => { stop_words = words; return stops; }
+  this.getStops = () => { return this.stop_words; }
+  this.setStops = (words) => { this.stop_words = words; }
+  this.isStop = (word) => { return this.stop_words.indexOf(word) >= 0; }
 
   this.wordCount = () => { return tokens.length; }
 
@@ -283,7 +300,9 @@ function TextAnalysis(input_text) {
 
   this.wordsOverFrequency =  (limit = 4) => {
     return Object.keys(this.frequencies)
-    .filter( word => this.frequencies[word].count >= limit);
+    .filter( (word) => {
+      return this.frequencies[word].count >= limit && !this.isStop(word);
+    });
   }
 
   this.getFrequency = (word) => { return this.frequencies[word].count || 0}
@@ -298,6 +317,7 @@ function TextAnalysis(input_text) {
     for(let i = 0; i < min_distance; i++) {
       if(!this.repeat_distances[i]) continue;
       this.repeat_distances[i].forEach((index) => {
+        if(this.isStop(this.wordAtIndex(index)))  return;
         repeats.push([index - i, index]);
       });
     }
@@ -305,6 +325,8 @@ function TextAnalysis(input_text) {
   }
 
 }
+
+TextAnalysis.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
 
 
 /***/ }),

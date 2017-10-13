@@ -11,17 +11,19 @@ let info;
 let issue_queue = [];
 let min_freq, repeat_distance;
 
-update();
+/* Initially, load stops from file, if they exist */
+console.log(TextAnalysis.stop_words);
+if(TextAnalysis.stop_words.length) {
+    $('#stop_words').text(TextAnalysis.stop_words.join(', '));
+}
 
-// Update the stop words list
-updateStops(info.getStops());
+update();
 
 
 /* ----- */
 
 // update list of words or indices with class
 function colorWords(words, class_name) {
-
   words.forEach((word) => {
     // if we're given a word, highlight by word. If number, highlight by
     // index
@@ -32,8 +34,13 @@ function colorWords(words, class_name) {
 
 }
 
-function updateStops(stops) {
-  if(stops) $('#stop_words').text(stops.join(', '));
+function updateStops() {
+  let stops = $('#stop_words')[0].innerText;
+  stops = stops.split(',');
+  stops = _.map(stops, (word) => {
+    return word.trim().toLowerCase();
+  });
+  info.setStops(stops);
 }
 
 function updateUserParams() {
@@ -50,9 +57,11 @@ function updateUserParams() {
     repeat_distance = default_repeat_distance;
     $('#repeat_distance').text(repeat_distance);
   }
+  updateStops();
 }
 
 function runAnalysis() {
+
   let text = $('#text_input')[0].innerText;
   info = new TextAnalysis(text);
   let most_frequent = info.wordsOverFrequency(min_freq);
@@ -103,8 +112,8 @@ function updateView() {
 function update() {
 
   // this must be called to get user-defined parameters
-  updateUserParams();
   runAnalysis();
+  updateUserParams();
   updateView();
 
 }
@@ -121,13 +130,18 @@ $("#text_input").on("input", function() {
 });
 
 // Also check for user-input parameters
+
 $("#min_freq").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
 });
 
-// Also check for user-input parameters
 $("#repeat_distance").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+$("#stop_words").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
 });

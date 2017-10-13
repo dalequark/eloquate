@@ -1,5 +1,6 @@
 import stop_words from './stopwords';
 
+// Todo: why can't I export a static method?
 export default function TextAnalysis(input_text) {
 
   let freq_dict = {};
@@ -17,7 +18,7 @@ export default function TextAnalysis(input_text) {
 
   tokens.forEach(function(word, word_index) {
 
-    if(stop_words.indexOf(word) >= 0 || word.length < 1)  return;
+    if(word.length < 1)  return;
 
     if(!freq_dict[word]) {
       freq_dict[word] = {'count' : 1, 'indices' : [word_index]};
@@ -47,14 +48,16 @@ export default function TextAnalysis(input_text) {
   /* ------------------------------------------------------------------------*/
 
   this.tokens = tokens;
+  this.stop_words = stop_words;
 
   this.frequencies = freq_dict;
 
   // Dictionary of distance_between_last_usage => index of all repeated words
   this.repeat_distances = repeat_dists;
 
-  this.getStops = () => { return stop_words; }
-  this.setStops = (words) => { stop_words = words; return stops; }
+  this.getStops = () => { return this.stop_words; }
+  this.setStops = (words) => { this.stop_words = words; }
+  this.isStop = (word) => { return this.stop_words.indexOf(word) >= 0; }
 
   this.wordCount = () => { return tokens.length; }
 
@@ -62,7 +65,9 @@ export default function TextAnalysis(input_text) {
 
   this.wordsOverFrequency =  (limit = 4) => {
     return Object.keys(this.frequencies)
-    .filter( word => this.frequencies[word].count >= limit);
+    .filter( (word) => {
+      return this.frequencies[word].count >= limit && !this.isStop(word);
+    });
   }
 
   this.getFrequency = (word) => { return this.frequencies[word].count || 0}
@@ -77,6 +82,7 @@ export default function TextAnalysis(input_text) {
     for(let i = 0; i < min_distance; i++) {
       if(!this.repeat_distances[i]) continue;
       this.repeat_distances[i].forEach((index) => {
+        if(this.isStop(this.wordAtIndex(index)))  return;
         repeats.push([index - i, index]);
       });
     }
@@ -84,3 +90,5 @@ export default function TextAnalysis(input_text) {
   }
 
 }
+
+TextAnalysis.stop_words = stop_words;
