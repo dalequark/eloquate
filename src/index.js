@@ -12,7 +12,6 @@ let issue_queue = [];
 let min_freq, repeat_distance;
 
 /* Initially, load stops from file, if they exist */
-console.log(TextAnalysis.stop_words);
 if(TextAnalysis.stop_words.length) {
     $('#stop_words').text(TextAnalysis.stop_words.join(', '));
 }

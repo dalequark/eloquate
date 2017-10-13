@@ -1,5 +1,5 @@
-var TextAnalyzer = require('./src/textAnalyzer.js');
-var assert = require('assert');
+import TextAnalyzer from './src/textAnalyzer.js';
+import assert from 'assert';
 
 var text = "This is a test test string, where the most repeated " +
 "words are test, string, and also repeated. But the shows up the " +

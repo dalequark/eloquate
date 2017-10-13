@@ -90,7 +90,6 @@ let issue_queue = [];
 let min_freq, repeat_distance;
 
 /* Initially, load stops from file, if they exist */
-console.log(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words);
 if(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.length) {
     __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.join(', '));
 }

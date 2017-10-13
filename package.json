@@ -4,7 +4,7 @@
   "description": "Interface for detecting writing issues.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --compilers js:babel-register",
     "build": "webpack --watch"
   },
   "author": "",
@@ -15,6 +15,9 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-register": "^6.26.0",
     "mocha": "^4.0.1",
     "webpack": "^3.6.0"
   }
