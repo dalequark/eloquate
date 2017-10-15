@@ -22,20 +22,14 @@ describe('analyzeText', function() {
     it('should not be null', function() { assert(freqs)});
 
     it('should make all word frequencies > 0', function() {
-      for(word in freqs) {
+      for(let word in freqs) {
         assert(freqs[word].count > 0, "Got count " +
         freqs[word].count + " for " + word);
       }
     });
 
-    it('should not contain stopwords', function() {
-      for(word in freqs) {
-        assert(info.getStops().indexOf(word) == -1);
-      }
-    });
-
     it('should have word indices point to actual words', function() {
-      for(word in freqs) {
+      for(let word in freqs) {
         freqs[word]['indices'].forEach((index) => {
           assert(info.tokens[index] == word, "For word " + word +
           " at index " + index + " found word\t" + info.tokens[index]);
