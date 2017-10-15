@@ -3,6 +3,14 @@ import $ from 'jquery';
 import blast from 'blast-text';
 import _ from 'lodash';
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+ReactDOM.render(
+  <h1>Hello, world!</h1>,
+  document.getElementById('root')
+);
+
 const debounce = 1000;
 const default_min_freq = 5;
 const default_repeat_distance = 5;
