@@ -60,763 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__textanalyzer__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_blast_text__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_blast_text___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_blast_text__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_lodash__);
-
-
-
-
-
-const debounce = 1000;
-const default_min_freq = 5;
-const default_repeat_distance = 5;
-
-let info;
-let issue_queue = [];
-let min_freq, repeat_distance;
-
-/* Initially, load stops from file, if they exist */
-if(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.length) {
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.join(', '));
-}
-
-update();
-
-
-/* ----- */
-
-// update list of words or indices with class
-function colorWords(words, class_name) {
-  words.forEach((word) => {
-    // if we're given a word, highlight by word. If number, highlight by
-    // index
-    let selector = typeof(word) == 'string' ? "#text_input .blast-word-" +
-    CSS.escape(word) : '#text_input span:nth-child(' + (word + 1) + ')';
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()(selector).addClass(class_name);
-  });
-
-}
-
-function updateStops() {
-  let stops = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words')[0].innerText;
-  stops = stops.split(',');
-  stops = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(stops, (word) => {
-    return word.trim().toLowerCase();
-  });
-  info.setStops(stops);
-}
-
-function updateUserParams() {
-  min_freq = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq')[0].innerText);
-  repeat_distance = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance')[0].innerText);
-
-  if(!min_freq || min_freq < 0) {
-    alert("# Repeats must be a number > 0!");
-    min_freq = default_min_freq;
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq').text(min_freq);
-  }
-  if(!repeat_distance || repeat_distance < 0) {
-    alert("# Repeats must be a number > 0!");
-    repeat_distance = default_repeat_distance;
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance').text(repeat_distance);
-  }
-  updateStops();
-}
-
-function runAnalysis() {
-
-  let text = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input')[0].innerText;
-  info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */](text);
-  let most_frequent = info.wordsOverFrequency(min_freq);
-
-  // add frequency errors to the error queue
-  issue_queue = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(most_frequent, (word) => {
-    return {
-      "message" : ("'" + word + "' was used " +
-      info.getFrequency(word) + " times."),
-      "indices" : info.getIndices(word)
-    }
-  });
-
-  let too_close = info.repeatsUnderDistance(repeat_distance);
-
-  // add frequency errors to the error queue
-  issue_queue = issue_queue.concat(
-    __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(too_close, (indices) => {
-      return {
-        "message" : "Word '" +
-        info.wordAtIndex(indices[0]) + "' was repeated " +
-        (indices[1] - indices[0]) + " words away",
-        "indices" : indices
-      }
-    })
-  );
-}
-
-function updateView() {
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
-    delimiter: 'word',
-    generateValueClass: true,
-    returnGenerated: false
-  });
-
-  // to do: don't calculate wordsOverFrequency twice, instead use a sort
-  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(info.repeatsUnderDistance(repeat_distance)), 'too_close');
-  colorWords(info.wordsOverFrequency(min_freq), 'frequent');
-
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#word_count').text("Word Count: " + info.wordCount());
-
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").empty();
-  issue_queue.forEach((issue) => {
-    __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
-  });
-}
-
-function update() {
-
-  // this must be called to get user-defined parameters
-  runAnalysis();
-  updateUserParams();
-  updateView();
-
-}
-
-__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config_button").on("click", function() {
-  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config").toggle();
-});
-
-// Let the timeout wait for you to finish typing
-let timeout;
-__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", function() {
-  clearTimeout(timeout);
-  timeout = setTimeout(update, debounce);
-});
-
-// Also check for user-input parameters
-
-__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#min_freq").on("input", function() {
-  clearTimeout(timeout);
-  timeout = setTimeout(update, debounce);
-});
-
-__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", function() {
-  clearTimeout(timeout);
-  timeout = setTimeout(update, debounce);
-});
-
-__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#stop_words").on("input", function() {
-  clearTimeout(timeout);
-  timeout = setTimeout(update, debounce);
-});
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = TextAnalysis;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__stopwords__);
-
-
-// Todo: why can't I export a static method?
-function TextAnalysis(input_text) {
-
-  let freq_dict = {};
-
-  // Keep track of distance between last word usage
-  let repeat_dists = {};
-
-  // Regex delimter matches the one from Blast.js
-  let tokens = input_text.split(/\s*(\S+)\s*/).filter((x) => { return x; });
-
-  for(let i = 0; i < tokens.length; i++) {
-    tokens[i] = tokens[i].toLowerCase();
-  }
-
-
-  tokens.forEach(function(word, word_index) {
-
-    if(word.length < 1)  return;
-
-    if(!freq_dict[word]) {
-      freq_dict[word] = {'count' : 1, 'indices' : [word_index]};
-      return;
-    }
-
-    let freq_info = freq_dict[word];
-
-    freq_info['count'] += 1;
-
-    // Positions of this word
-    let last_index = freq_info['indices'][freq_info['indices'].length - 1];
-    freq_info['indices'].push(word_index);
-
-    // map distance (as key) to index of word
-
-    let word_distance = word_index - last_index;
-    if(repeat_dists[word_distance]) {
-      repeat_dists[word_distance].push(word_index);
-    } else {
-      repeat_dists[word_distance] = [word_index];
-    }
-
-  });
-
-
-  /* ------------------------------------------------------------------------*/
-
-  this.tokens = tokens;
-  this.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
-
-  this.frequencies = freq_dict;
-
-  // Dictionary of distance_between_last_usage => index of all repeated words
-  this.repeat_distances = repeat_dists;
-
-  this.getStops = () => { return this.stop_words; }
-  this.setStops = (words) => { this.stop_words = words; }
-  this.isStop = (word) => { return this.stop_words.indexOf(word) >= 0; }
-
-  this.wordCount = () => { return tokens.length; }
-
-  this.wordAtIndex = (index) => { return tokens[index]; }
-
-  this.wordsOverFrequency =  (limit = 4) => {
-    return Object.keys(this.frequencies)
-    .filter( (word) => {
-      return this.frequencies[word].count >= limit && !this.isStop(word);
-    });
-  }
-
-  this.getFrequency = (word) => { return this.frequencies[word].count || 0}
-
-  this.getIndices = (word) => {
-    return this.frequencies[word].indices || [];
-  }
-
-  // Returns indices of words repeated under distance
-  this.repeatsUnderDistance = (min_distance = 10) => {
-    let repeats = [];
-    for(let i = 0; i < min_distance; i++) {
-      if(!this.repeat_distances[i]) continue;
-      this.repeat_distances[i].forEach((index) => {
-        if(this.isStop(this.wordAtIndex(index)))  return;
-        repeats.push([index - i, index]);
-      });
-    }
-    return repeats;
-  }
-
-}
-
-TextAnalysis.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/****************
-    Blast.js
-****************/
-
-/*! Blast.js (2.0.0): julian.com/research/blast (C) 2015 Julian Shapiro. MIT @license: en.wikipedia.org/wiki/MIT_License */
-
-var $ = __webpack_require__(3);
-
-;(function (window, document, undefined) {
-
-    /*********************
-       Helper Functions
-    *********************/
-
-    /* IE detection. Gist: https://gist.github.com/julianshapiro/9098609 */
-    var IE = (function () {
-        if (document.documentMode) {
-            return document.documentMode;
-        } else {
-            for (var i = 7; i > 0; i--) {
-                var div = document.createElement("div");
-
-                div.innerHTML = "<!--[if IE " + i + "]><span></span><![endif]-->";
-
-                if (div.getElementsByTagName("span").length) {
-                    div = null;
-
-                    return i;
-                }
-
-                div = null;
-            }
-        }
-
-        return undefined;
-    })();
-
-    /* Shim to prevent console.log() from throwing errors on IE<=7. */
-    var console = window.console || { log: function () {}, time: function () {} };
-
-    /*****************
-        Constants
-    *****************/
-
-    var NAME = "blast",
-        characterRanges = {
-            latinPunctuation: "–—′’'“″„\"(«.…¡¿′’'”″“\")».…!?",
-            latinLetters: "\\u0041-\\u005A\\u0061-\\u007A\\u00C0-\\u017F\\u0100-\\u01FF\\u0180-\\u027F"
-        },
-        Reg = {
-            /* If the abbreviations RegEx is missing a title abbreviation that you find yourself needing to often escape manually, tweet me: @Shapiro. */
-            abbreviations: new RegExp("[^" + characterRanges.latinLetters + "](e\\.g\\.)|(i\\.e\\.)|(mr\\.)|(mrs\\.)|(ms\\.)|(dr\\.)|(prof\\.)|(esq\\.)|(sr\\.)|(jr\\.)[^" + characterRanges.latinLetters + "]", "ig"),
-            innerWordPeriod: new RegExp("[" + characterRanges.latinLetters + "]\.[" + characterRanges.latinLetters + "]", "ig"),
-            onlyContainsPunctuation: new RegExp("[^" + characterRanges.latinPunctuation + "]"),
-            adjoinedPunctuation: new RegExp("^[" + characterRanges.latinPunctuation + "]+|[" + characterRanges.latinPunctuation + "]+$", "g"),
-            skippedElements: /(script|style|select|textarea)/i,
-            hasPluginClass: new RegExp("(^| )" + NAME + "( |$)", "gi")
-        };
-
-    /****************
-       $.fn.blast
-    ****************/
-
-    $.fn[NAME] = function (options) {
-
-        /*************************
-           Punctuation Escaping
-        *************************/
-
-        /* Escape likely false-positives of sentence-final periods. Escaping is performed by wrapping a character's ASCII equivalent in double curly brackets,
-           which is then reversed (deencodcoded) after delimiting. */
-        function encodePunctuation (text) {
-            return text
-                    /* Escape the following Latin abbreviations and English titles: e.g., i.e., Mr., Mrs., Ms., Dr., Prof., Esq., Sr., and Jr. */
-                    .replace(Reg.abbreviations, function(match) {
-                        return match.replace(/\./g, "{{46}}");
-                    })
-                    /* Escape inner-word (non-space-delimited) periods. For example, the period inside "Blast.js". */
-                    .replace(Reg.innerWordPeriod, function(match) {
-                        return match.replace(/\./g, "{{46}}");
-                    });
-        }
-
-        /* Used to decode both the output of encodePunctuation() and punctuation that has been manually escaped by users. */
-        function decodePunctuation (text) {
-            return text.replace(/{{(\d{1,3})}}/g, function(fullMatch, subMatch) {
-                return String.fromCharCode(subMatch);
-            });
-        }
-
-        /******************
-           DOM Traversal
-        ******************/
-
-        function wrapNode (node, opts) {
-            var wrapper = document.createElement(opts.tag);
-
-            /* Assign the element a class of "blast". */
-            wrapper.className = NAME;
-
-            /* If a custom class was provided, assign that too. */
-            if (opts.customClass) {
-                wrapper.className += " " + opts.customClass;
-
-                /* If an opts.customClass is provided, generate an ID consisting of customClass and a number indicating the match's iteration. */
-                if (opts.generateIndexID) {
-                    wrapper.id = opts.customClass + "-" + Element.blastedIndex;
-                }
-            }
-
-            /* For the "all" delimiter, prevent space characters from collapsing. */
-            if (opts.delimiter === "all" && /\s/.test(node.data)) {
-                wrapper.style.whiteSpace = "pre-line";
-            }
-
-            /* Assign the element a class equal to its escaped inner text. Only applicable to the character and word delimiters (since they do not contain spaces). */
-            if (opts.generateValueClass === true && !opts.search && (opts.delimiter === "character" || opts.delimiter === "word")) {
-                var valueClass,
-                    text = node.data;
-
-                /* For the word delimiter, remove adjoined punctuation, which is unlikely to be desired as part of the match -- unless the text
-                   consists solely of punctuation (e.g. "!!!"), in which case we leave the text as-is. */
-                if (opts.delimiter === "word" && Reg.onlyContainsPunctuation.test(text)) {
-                    /* E: Remove punctuation that's adjoined to either side of the word match. */
-                    text = text.replace(Reg.adjoinedPunctuation, "");
-                }
-
-                valueClass = NAME + "-" + opts.delimiter.toLowerCase() + "-" + text.toLowerCase();
-
-                wrapper.className += " " + valueClass;
-            }
-
-            /* Hide the wrapper elements from screenreaders now that we've set the target's aria-label attribute. */
-            if (opts.aria) {
-                wrapper.setAttribute("aria-hidden", "true");
-            }
-
-            wrapper.appendChild(node.cloneNode(false));
-
-            return wrapper;
-        }
-
-        function traverseDOM (node, opts) {
-            var matchPosition = -1,
-                skipNodeBit = 0;
-
-            /* Only proceed if the node is a text node and isn't empty. */
-            if (node.nodeType === 3 && node.data.length) {
-                /* Perform punctuation encoding/decoding once per original whole text node (before it gets split up into bits). */
-                if (Element.nodeBeginning) {
-                    /* For the sentence delimiter, we first escape likely false-positive sentence-final punctuation. For all other delimiters,
-                       we must decode the user's manually-escaped punctuation so that the RegEx can match correctly (without being thrown off by characters in {{ASCII}}). */
-                    node.data = (!opts.search && opts.delimiter === "sentence") ? encodePunctuation(node.data) : decodePunctuation(node.data);
-
-                    Element.nodeBeginning = false;
-                }
-
-                matchPosition = node.data.search(delimiterRegex);
-
-                /* If there's a RegEx match in this text node, proceed with element wrapping. */
-                if (matchPosition !== -1) {
-                    var match = node.data.match(delimiterRegex),
-                        matchText = match[0],
-                        subMatchText = match[1] || false;
-
-                    /* RegEx queries that can return empty strings (e.g ".*") produce an empty matchText which throws the entire traversal process into an infinite loop due to the position index not incrementing.
-                       Thus, we bump up the position index manually, resulting in a zero-width split at this location followed by the continuation of the traversal process. */
-                    if (matchText === "") {
-                        matchPosition++;
-                    /* If a RegEx submatch is produced that is not identical to the full string match, use the submatch's index position and text.
-                       This technique allows us to avoid writing multi-part RegEx queries for submatch finding. */
-                    } else if (subMatchText && subMatchText !== matchText) {
-                        matchPosition += matchText.indexOf(subMatchText);
-                        matchText = subMatchText;
-                    }
-
-                    /* Split this text node into two separate nodes at the position of the match, returning the node that begins after the match position. */
-                    var middleBit = node.splitText(matchPosition);
-
-                    /* Split the newly-produced text node at the end of the match's text so that middleBit is a text node that consists solely of the matched text. The other newly-created text node, which begins
-                       at the end of the match's text, is what will be traversed in the subsequent loop (in order to find additional matches in the containing text node). */
-                    middleBit.splitText(matchText.length);
-
-                    /* Over-increment the loop counter (see below) so that we skip the extra node (middleBit) that we've just created (and already processed). */
-                    skipNodeBit = 1;
-
-                    if (!opts.search && opts.delimiter === "sentence") {
-                        /* Now that we've forcefully escaped all likely false-positive sentence-final punctuation, we must decode the punctuation back from ASCII. */
-                        middleBit.data = decodePunctuation(middleBit.data);
-                    }
-
-                    /* Create the wrapped node. */
-                    var wrappedNode = wrapNode(middleBit, opts, Element.blastedIndex);
-                    /* Then replace the middleBit text node with its wrapped version. */
-                    middleBit.parentNode.replaceChild(wrappedNode, middleBit);
-
-                    /* Push the wrapper onto the Element.wrappers array (for later use with stack manipulation). */
-                    Element.wrappers.push(wrappedNode);
-
-                    Element.blastedIndex++;
-
-                    /* Note: We use this slow splice-then-iterate method because every match needs to be converted into an HTML element node. A text node's text cannot have HTML elements inserted into it. */
-                    /* TODO: To improve performance, use documentFragments to delay node manipulation so that DOM queries and updates can be batched across elements. */
-                }
-            /* Traverse the DOM tree until we find text nodes. Skip script and style elements. Skip select and textarea elements since they contain special text nodes that users would not want wrapped.
-               Additionally, check for the existence of our plugin's class to ensure that we do not retraverse elements that have already been blasted. */
-            /* Note: This basic DOM traversal technique is copyright Johann Burkard <http://johannburkard.de>. Licensed under the MIT License: http://en.wikipedia.org/wiki/MIT_License */
-            } else if (node.nodeType === 1 && node.hasChildNodes() && !Reg.skippedElements.test(node.tagName) && !Reg.hasPluginClass.test(node.className)) {
-                /* Note: We don't cache childNodes' length since it's a live nodeList (which changes dynamically with the use of splitText() above). */
-                for (var i = 0; i < node.childNodes.length; i++) {
-                    Element.nodeBeginning = true;
-
-                    i += traverseDOM(node.childNodes[i], opts);
-                }
-            }
-
-            return skipNodeBit;
-        }
-
-        /*******************
-           Call Variables
-        *******************/
-
-        var opts = $.extend({}, $.fn[NAME].defaults, options),
-            delimiterRegex,
-            /* Container for variables specific to each element targeted by the Blast call. */
-            Element = {};
-
-        /***********************
-           Delimiter Creation
-        ***********************/
-
-        /* Ensure that the opts.delimiter search variable is a non-empty string. */
-        if (opts.search.length && (typeof opts.search === "string" || /^\d/.test(parseFloat(opts.search)))) {
-            /* Since the search is performed as a Regex (see below), we escape the string's Regex meta-characters. */
-            opts.delimiter = opts.search.toString().replace(/[-[\]{,}(.)*+?|^$\\\/]/g, "\\$&");
-
-            /* Note: This matches the apostrophe+s of the phrase's possessive form: {PHRASE's}. */
-            /* Note: This will not match text that is part of a compound word (two words adjoined with a dash), e.g. "front" won't match inside "front-end". */
-            /* Note: Based on the way the search algorithm is implemented, it is not possible to search for a string that consists solely of punctuation characters. */
-            /* Note: By creating boundaries at Latin alphabet ranges instead of merely spaces, we effectively match phrases that are inlined alongside any type of non-Latin-letter,
-               e.g. word|, word!, ♥word♥ will all match. */
-            delimiterRegex = new RegExp("(?:^|[^-" + characterRanges.latinLetters + "])(" + opts.delimiter + "('s)?)(?![-" + characterRanges.latinLetters + "])", "i");
-        } else {
-            /* Normalize the string's case for the delimiter switch check below. */
-            if (typeof opts.delimiter === "string") {
-                opts.delimiter = opts.delimiter.toLowerCase();
-            }
-
-            switch (opts.delimiter) {
-                case "all":
-                    /* Matches every character then later sets spaces to "white-space: pre-line" so they don't collapse. */
-                    delimiterRegex = /(.)/;
-                    break;
-
-                case "letter":
-                case "char":
-                case "character":
-                    /* Matches every non-space character. */
-                    /* Note: This is the slowest delimiter. However, its slowness is only noticeable when it's used on larger bodies of text (of over 500 characters) on <=IE8.
-                       (Run Blast with opts.debug=true to monitor execution times.) */
-                    delimiterRegex = /(\S)/;
-                    break;
-
-                case "word":
-                    /* Matches strings in between space characters. */
-                    /* Note: Matches will include any punctuation that's adjoined to the word, e.g. "Hey!" will be a full match. */
-                    /* Note: Remember that, with Blast, every HTML element marks the start of a brand new string. Hence, "in<b>si</b>de" matches as three separate words. */
-                    delimiterRegex = /\s*(\S+)\s*/;
-                    break;
-
-                case "sentence":
-                    /* Matches phrases either ending in Latin alphabet punctuation or located at the end of the text. (Linebreaks are not considered punctuation.) */
-                    /* Note: If you don't want punctuation to demarcate a sentence match, replace the punctuation character with {{ASCII_CODE_FOR_DESIRED_PUNCTUATION}}. ASCII codes: .={{46}}, ?={{63}}, !={{33}} */
-                    delimiterRegex = /(?=\S)(([.]{2,})?[^!?]+?([.…!?]+|(?=\s+$)|$)(\s*[′’'”″“")»]+)*)/;
-                    /* RegExp explanation (Tip: Use Regex101.com to play around with this expression and see which strings it matches):
-                       - Expanded view: /(?=\S) ( ([.]{2,})? [^!?]+? ([.…!?]+|(?=\s+$)|$) (\s*[′’'”″“")»]+)* )
-                       - (?=\S) --> Match must contain a non-space character.
-                       - ([.]{2,})? --> Match may begin with a group of periods.
-                       - [^!?]+? --> Grab everything that isn't an unequivocally-terminating punctuation character, but stop at the following condition...
-                       - ([.…!?]+|(?=\s+$)|$) --> Match the last occurrence of sentence-final punctuation or the end of the text (optionally with left-side trailing spaces).
-                       - (\s*[′’'”″“")»]+)* --> After the final punctuation, match any and all pairs of (optionally space-delimited) quotes and parentheses.
-                    */
-                    break;
-
-                case "element":
-                    /* Matches text between HTML tags. */
-                    /* Note: Wrapping always occurs inside of elements, i.e. <b><span class="blast">Bolded text here</span></b>. */
-                    delimiterRegex = /(?=\S)([\S\s]*\S)/;
-                    break;
-
-                /*****************
-                   Custom Regex
-                *****************/
-
-                default:
-                    /* You can pass in /your-own-regex/. */
-                    if (opts.delimiter instanceof RegExp) {
-                        delimiterRegex = opts.delimiter;
-                    } else {
-                        console.log(NAME + ": Unrecognized delimiter, empty search string, or invalid custom Regex. Aborting.");
-
-                        /* Abort this Blast call. */
-                        return true;
-                    }
-            }
-        }
-
-        /**********************
-           Element Iteration
-        **********************/
-
-        this.each(function() {
-            var $this = $(this),
-                text = $this.text();
-
-            /* When anything except false is passed in for the options object, Blast is initiated. */
-            if (options !== false) {
-
-                /**********************
-                   Element Variables
-                **********************/
-
-                Element = {
-                    /* The index of each wrapper element generated by blasting. */
-                    blastedIndex: 0,
-                    /* Whether we're just entering this node. */
-                    nodeBeginning: false,
-                    /* Keep track of the elements generated by Blast so that they can (optionally) be pushed onto the jQuery call stack. */
-                    wrappers: Element.wrappers || []
-                };
-
-                /*****************
-                   Housekeeping
-                *****************/
-
-                /* Unless a consecutive opts.search is being performed, an element's existing Blast call is reversed before proceeding. */
-                if ($this.data(NAME) !== undefined && ($this.data(NAME) !== "search" || opts.search === false)) {
-                    reverse($this, opts);
-
-                    if (opts.debug) console.log(NAME + ": Removed element's existing Blast call.");
-                }
-
-                /* Store the current delimiter type so that it can be compared against on subsequent calls (see above). */
-                $this.data(NAME, opts.search !== false ? "search" : opts.delimiter);
-
-                if (opts.aria) {
-                    $this.attr("aria-label", text);
-                }
-
-                /****************
-                   Preparation
-                ****************/
-
-                /* Perform optional HTML tag stripping. */
-                if (opts.stripHTMLTags) {
-                    $this.html(text);
-                }
-
-                /* If the browser throws an error for the provided element type (browers whitelist the letters and types of the elements they accept), fall back to using "span". */
-                try {
-                    document.createElement(opts.tag);
-                } catch (error) {
-                    opts.tag = "span";
-
-                    if (opts.debug) console.log(NAME + ": Invalid tag supplied. Defaulting to span.");
-                }
-
-                /* For reference purposes when reversing Blast, assign the target element a root class. */
-                $this.addClass(NAME + "-root");
-
-                /* Initiate the DOM traversal process. */
-                if (opts.debug) console.time(NAME);
-                traverseDOM(this, opts);
-                if (opts.debug) console.timeEnd(NAME);
-
-            /* If false is passed in as the first parameter, reverse Blast. */
-            } else if (options === false && $this.data(NAME) !== undefined) {
-                reverse($this, opts);
-            }
-
-            /**************
-               Debugging
-            **************/
-
-            /* Output the full string of each wrapper element and color alternate the wrappers. This is in addition to the performance timing that has already been outputted. */
-            if (opts.debug) {
-                $.each(Element.wrappers, function(index, element) {
-                    console.log(NAME + " [" + opts.delimiter + "] " + this.outerHTML);
-                    this.style.backgroundColor = index % 2 ? "#f12185" : "#075d9a";
-                });
-            }
-        });
-
-        /************
-           Reverse
-        ************/
-
-        function reverse ($this, opts) {
-            if (opts.debug) console.time("blast reversal");
-
-            var skippedDescendantRoot = false;
-
-            $this
-                .removeClass(NAME + "-root")
-                .removeAttr("aria-label")
-                .find("." + NAME)
-                    .each(function () {
-                        var $this = $(this);
-                        /* Do not reverse Blast on descendant root elements. (Before you can reverse Blast on an element, you must reverse Blast on any parent elements that have been Blasted.) */
-                        if (!$this.closest("." + NAME + "-root").length) {
-                            var thisParentNode = this.parentNode;
-
-                            /* This triggers some sort of node layout, thereby solving a node normalization bug in <=IE7 for reasons unknown. If you know the specific reason, tweet me: @Shapiro. */
-                            if (IE <= 7) (thisParentNode.firstChild.nodeName);
-
-                            /* Strip the HTML tags off of the wrapper elements by replacing the elements with their child node's text. */
-                            thisParentNode.replaceChild(this.firstChild, this);
-
-                            /* Normalize() parents to remove empty text nodes and concatenate sibling text nodes. (This cleans up the DOM after our manipulation.) */
-                            thisParentNode.normalize();
-                        } else {
-                            skippedDescendantRoot = true;
-                        }
-                    });
-
-            /* Zepto core doesn't include cache-based $.data(), so we mimic data-attr removal by setting it to undefined. */
-            if (window.Zepto) {
-                $this.data(NAME, undefined);
-            } else {
-                $this.removeData(NAME);
-            }
-
-            if (opts.debug) {
-                console.log(NAME + ": Reversed Blast" + ($this.attr("id") ? " on #" + $this.attr("id") + "." : ".") + (skippedDescendantRoot ? " Skipped reversal on the children of one or more descendant root elements." : ""));
-                console.timeEnd("blast reversal");
-            }
-        }
-
-        /*************
-            Chain
-        *************/
-
-        /* Either return a stack composed of our call's Element.wrappers or return the element(s) originally targeted by the Blast call. */
-        /* Note: returnGenerated can only be disabled on a per-call basis (not a per-element basis). */
-        if (options !== false && opts.returnGenerated === true) {
-            /* A reimplementation of jQuery's $.pushStack() (since Zepto does not provide this function). */
-            var newStack = $().add(Element.wrappers);
-            newStack.prevObject = this;
-            newStack.context = this.context;
-
-            return newStack;
-        } else {
-            return this;
-        }
-    };
-
-    /***************
-        Defaults
-    ***************/
-
-    $.fn.blast.defaults = {
-        returnGenerated: true,
-        delimiter: "word",
-        tag: "span",
-        search: false,
-        customClass: "",
-        generateIndexID: false,
-        generateValueClass: false,
-        stripHTMLTags: false,
-        aria: true,
-        debug: false
-    };
-})(window, document);
-
-/*****************
-   Known Issues
-*****************/
-
-/* In <=IE7, when Blast is called on the same element more than once with opts.stripHTMLTags=false, calls after the first may not target the entirety of the element and/or may
-   inject excess spacing between inner text parts due to <=IE7's faulty node normalization. */
-
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -11076,7 +10324,951 @@ return jQuery;
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__textanalyzer__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_blast_text__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_blast_text___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_blast_text__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_lodash__);
+
+
+
+
+
+const debounce = 1000;
+const default_min_freq = 5;
+const default_repeat_distance = 5;
+
+let info;
+let issue_queue = [];
+let min_freq, repeat_distance;
+
+/* Initially, load stops from file, if they exist */
+if(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.length) {
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words').text(__WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */].stop_words.join(', '));
+}
+
+update();
+
+
+/* ----- */
+
+// update list of words or indices with class
+function colorWords(words, class_name) {
+  words.forEach((word) => {
+    // if we're given a word, highlight by word. If number, highlight by
+    // index
+    let selector = typeof(word) == 'string' ? "#text_input .blast-word-" +
+    CSS.escape(word) : '#text_input span:nth-child(' + (word + 1) + ')';
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()(selector).addClass(class_name);
+  });
+
+}
+
+function updateStops() {
+  let stops = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#stop_words')[0].innerText;
+  stops = stops.split(',');
+  stops = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(stops, (word) => {
+    return word.trim().toLowerCase();
+  });
+  info.setStops(stops);
+}
+
+function updateUserParams() {
+  min_freq = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq')[0].innerText);
+  repeat_distance = parseInt(__WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance')[0].innerText);
+
+  if(!min_freq || min_freq < 0) {
+    alert("# Repeats must be a number > 0!");
+    min_freq = default_min_freq;
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#min_freq').text(min_freq);
+  }
+  if(!repeat_distance || repeat_distance < 0) {
+    alert("# Repeats must be a number > 0!");
+    repeat_distance = default_repeat_distance;
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#repeat_distance').text(repeat_distance);
+  }
+  updateStops();
+}
+
+function runAnalysis() {
+
+  let text = __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input')[0].innerText;
+  info = new __WEBPACK_IMPORTED_MODULE_0__textanalyzer__["a" /* default */](text);
+  let most_frequent = info.wordsOverFrequency(min_freq);
+
+  // add frequency errors to the error queue
+  issue_queue = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(most_frequent, (word) => {
+    return {
+      "message" : ("'" + word + "' was used " +
+      info.getFrequency(word) + " times."),
+      "indices" : info.getIndices(word),
+      "type" : "repeat",
+      "val" : info.getFrequency(word)
+    }
+  });
+
+  let too_close = info.repeatsUnderDistance(repeat_distance);
+
+  // add frequency errors to the error queue
+  issue_queue = issue_queue.concat(
+    __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.map(too_close, (indices) => {
+      return {
+        "message" : "Word '" +
+        info.wordAtIndex(indices[0]) + "' was repeated " +
+        (indices[1] - indices[0]) + " words away",
+        "indices" : indices,
+        "type" : "too_close",
+        "val" : (indices[1] - indices[0])
+      }
+    })
+  );
+}
+
+function updateView() {
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#text_input').blast({
+    delimiter: 'word',
+    generateValueClass: true,
+    returnGenerated: false
+  });
+
+  // to do: don't calculate wordsOverFrequency twice, instead use a sort
+  colorWords(__WEBPACK_IMPORTED_MODULE_3_lodash___default.a.flatten(info.repeatsUnderDistance(repeat_distance)), 'too_close');
+  colorWords(info.wordsOverFrequency(min_freq), 'frequent');
+
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()('#word_count').text("Word Count: " + info.wordCount());
+
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").empty();
+
+  let this_queue = __WEBPACK_IMPORTED_MODULE_3_lodash___default.a.sortBy(issue_queue, (x) => {
+    return x.type == "repeat" ? 0 - x.val : x.val;
+  });
+
+  this_queue.forEach((issue) => {
+    __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
+  });
+}
+
+function update() {
+
+  // this must be called to get user-defined parameters
+  runAnalysis();
+  updateUserParams();
+  updateView();
+
+}
+
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config_button").on("click", function() {
+  __WEBPACK_IMPORTED_MODULE_1_jquery___default()("#config").toggle();
+});
+
+// Let the timeout wait for you to finish typing
+let timeout;
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#text_input").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+// Also check for user-input parameters
+
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#min_freq").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#repeat_distance").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+__WEBPACK_IMPORTED_MODULE_1_jquery___default()("#stop_words").on("input", function() {
+  clearTimeout(timeout);
+  timeout = setTimeout(update, debounce);
+});
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = TextAnalysis;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stopwords___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__stopwords__);
+
+
+// Todo: why can't I export a static method?
+function TextAnalysis(input_text) {
+
+  let freq_dict = {};
+
+  // Keep track of distance between last word usage
+  let repeat_dists = {};
+
+  // Regex delimter matches the one from Blast.js
+  let tokens = input_text.split(/\s*(\S+)\s*/).filter((x) => { return x; });
+
+  for(let i = 0; i < tokens.length; i++) {
+    tokens[i] = tokens[i].toLowerCase();
+  }
+
+
+  tokens.forEach(function(word, word_index) {
+
+    if(word.length < 1)  return;
+
+    if(!freq_dict[word]) {
+      freq_dict[word] = {'count' : 1, 'indices' : [word_index]};
+      return;
+    }
+
+    let freq_info = freq_dict[word];
+
+    freq_info['count'] += 1;
+
+    // Positions of this word
+    let last_index = freq_info['indices'][freq_info['indices'].length - 1];
+    freq_info['indices'].push(word_index);
+
+    // map distance (as key) to index of word
+
+    let word_distance = word_index - last_index;
+    if(repeat_dists[word_distance]) {
+      repeat_dists[word_distance].push(word_index);
+    } else {
+      repeat_dists[word_distance] = [word_index];
+    }
+
+  });
+
+
+  /* ------------------------------------------------------------------------*/
+
+  this.tokens = tokens;
+  this.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
+
+  this.frequencies = freq_dict;
+
+  // Dictionary of distance_between_last_usage => index of all repeated words
+  this.repeat_distances = repeat_dists;
+
+  this.getStops = () => { return this.stop_words; }
+  this.setStops = (words) => { this.stop_words = words; }
+  this.isStop = (word) => { return this.stop_words.indexOf(word) >= 0; }
+
+  this.wordCount = () => { return tokens.length; }
+
+  this.wordAtIndex = (index) => { return tokens[index]; }
+
+  this.wordsOverFrequency =  (limit = 4) => {
+    return Object.keys(this.frequencies)
+    .filter( (word) => {
+      return this.frequencies[word].count >= limit && !this.isStop(word);
+    });
+  }
+
+  this.getFrequency = (word) => { return this.frequencies[word].count || 0}
+
+  this.getIndices = (word) => {
+    return this.frequencies[word].indices || [];
+  }
+
+  // Returns indices of words repeated under distance
+  this.repeatsUnderDistance = (min_distance = 10) => {
+    let repeats = [];
+    for(let i = 0; i < min_distance; i++) {
+      if(!this.repeat_distances[i]) continue;
+      this.repeat_distances[i].forEach((index) => {
+        if(this.isStop(this.wordAtIndex(index)))  return;
+        repeats.push([index - i, index]);
+      });
+    }
+    return repeats;
+  }
+
+}
+
+TextAnalysis.stop_words = __WEBPACK_IMPORTED_MODULE_0__stopwords___default.a;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+// Courtesy https://github.com/Alir3z4/stop-words/blob/master/english.txt
+
+module.exports =
+['a',
+ 'about',
+ 'above',
+ 'after',
+ 'again',
+ 'against',
+ 'all',
+ 'am',
+ 'an',
+ 'and',
+ 'any',
+ 'are',
+ "aren't",
+ 'as',
+ 'at',
+ 'be',
+ 'because',
+ 'been',
+ 'before',
+ 'being',
+ 'below',
+ 'between',
+ 'both',
+ 'but',
+ 'by',
+ "can't",
+ 'cannot',
+ 'could',
+ "couldn't",
+ 'did',
+ "didn't",
+ 'do',
+ 'does',
+ "doesn't",
+ 'doing',
+ "don't",
+ 'down',
+ 'during',
+ 'each',
+ 'few',
+ 'for',
+ 'from',
+ 'further',
+ 'had',
+ "hadn't",
+ 'has',
+ "hasn't",
+ 'have',
+ "haven't",
+ 'having',
+ 'he',
+ "he'd",
+ "he'll",
+ "he's",
+ 'her',
+ 'here',
+ "here's",
+ 'hers',
+ 'herself',
+ 'him',
+ 'himself',
+ 'his',
+ 'how',
+ "how's",
+ 'i',
+ "i'd",
+ "i'll",
+ "i'm",
+ "i've",
+ 'if',
+ 'in',
+ 'into',
+ 'is',
+ "isn't",
+ 'it',
+ "it's",
+ 'its',
+ 'itself',
+ "let's",
+ 'me',
+ 'more',
+ 'most',
+ "mustn't",
+ 'my',
+ 'myself',
+ 'no',
+ 'nor',
+ 'not',
+ 'of',
+ 'off',
+ 'on',
+ 'once',
+ 'only',
+ 'or',
+ 'other',
+ 'ought',
+ 'our',
+ 'ours',
+ 'ourselves',
+ 'out',
+ 'over',
+ 'own',
+ 'same',
+ "shan't",
+ 'she',
+ "she'd",
+ "she'll",
+ "she's",
+ 'should',
+ "shouldn't",
+ 'so',
+ 'some',
+ 'such',
+ 'than',
+ 'that',
+ "that's",
+ 'the',
+ 'their',
+ 'theirs',
+ 'them',
+ 'themselves',
+ 'then',
+ 'there',
+ "there's",
+ 'these',
+ 'they',
+ "they'd",
+ "they'll",
+ "they're",
+ "they've",
+ 'this',
+ 'those',
+ 'through',
+ 'to',
+ 'too',
+ 'under',
+ 'until',
+ 'up',
+ 'very',
+ 'was',
+ "wasn't",
+ 'we',
+ "we'd",
+ "we'll",
+ "we're",
+ "we've",
+ 'were',
+ "weren't",
+ 'what',
+ "what's",
+ 'when',
+ "when's",
+ 'where',
+ "where's",
+ 'which',
+ 'while',
+ 'who',
+ "who's",
+ 'whom',
+ 'why',
+ "why's",
+ 'with',
+ "won't",
+ 'would',
+ "wouldn't",
+ 'you',
+ "you'd",
+ "you'll",
+ "you're",
+ "you've",
+ 'your',
+ 'yours',
+ 'yourself',
+ 'yourselves']
+
+
+/***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/****************
+    Blast.js
+****************/
+
+/*! Blast.js (2.0.0): julian.com/research/blast (C) 2015 Julian Shapiro. MIT @license: en.wikipedia.org/wiki/MIT_License */
+
+var $ = __webpack_require__(0);
+
+;(function (window, document, undefined) {
+
+    /*********************
+       Helper Functions
+    *********************/
+
+    /* IE detection. Gist: https://gist.github.com/julianshapiro/9098609 */
+    var IE = (function () {
+        if (document.documentMode) {
+            return document.documentMode;
+        } else {
+            for (var i = 7; i > 0; i--) {
+                var div = document.createElement("div");
+
+                div.innerHTML = "<!--[if IE " + i + "]><span></span><![endif]-->";
+
+                if (div.getElementsByTagName("span").length) {
+                    div = null;
+
+                    return i;
+                }
+
+                div = null;
+            }
+        }
+
+        return undefined;
+    })();
+
+    /* Shim to prevent console.log() from throwing errors on IE<=7. */
+    var console = window.console || { log: function () {}, time: function () {} };
+
+    /*****************
+        Constants
+    *****************/
+
+    var NAME = "blast",
+        characterRanges = {
+            latinPunctuation: "–—′’'“″„\"(«.…¡¿′’'”″“\")».…!?",
+            latinLetters: "\\u0041-\\u005A\\u0061-\\u007A\\u00C0-\\u017F\\u0100-\\u01FF\\u0180-\\u027F"
+        },
+        Reg = {
+            /* If the abbreviations RegEx is missing a title abbreviation that you find yourself needing to often escape manually, tweet me: @Shapiro. */
+            abbreviations: new RegExp("[^" + characterRanges.latinLetters + "](e\\.g\\.)|(i\\.e\\.)|(mr\\.)|(mrs\\.)|(ms\\.)|(dr\\.)|(prof\\.)|(esq\\.)|(sr\\.)|(jr\\.)[^" + characterRanges.latinLetters + "]", "ig"),
+            innerWordPeriod: new RegExp("[" + characterRanges.latinLetters + "]\.[" + characterRanges.latinLetters + "]", "ig"),
+            onlyContainsPunctuation: new RegExp("[^" + characterRanges.latinPunctuation + "]"),
+            adjoinedPunctuation: new RegExp("^[" + characterRanges.latinPunctuation + "]+|[" + characterRanges.latinPunctuation + "]+$", "g"),
+            skippedElements: /(script|style|select|textarea)/i,
+            hasPluginClass: new RegExp("(^| )" + NAME + "( |$)", "gi")
+        };
+
+    /****************
+       $.fn.blast
+    ****************/
+
+    $.fn[NAME] = function (options) {
+
+        /*************************
+           Punctuation Escaping
+        *************************/
+
+        /* Escape likely false-positives of sentence-final periods. Escaping is performed by wrapping a character's ASCII equivalent in double curly brackets,
+           which is then reversed (deencodcoded) after delimiting. */
+        function encodePunctuation (text) {
+            return text
+                    /* Escape the following Latin abbreviations and English titles: e.g., i.e., Mr., Mrs., Ms., Dr., Prof., Esq., Sr., and Jr. */
+                    .replace(Reg.abbreviations, function(match) {
+                        return match.replace(/\./g, "{{46}}");
+                    })
+                    /* Escape inner-word (non-space-delimited) periods. For example, the period inside "Blast.js". */
+                    .replace(Reg.innerWordPeriod, function(match) {
+                        return match.replace(/\./g, "{{46}}");
+                    });
+        }
+
+        /* Used to decode both the output of encodePunctuation() and punctuation that has been manually escaped by users. */
+        function decodePunctuation (text) {
+            return text.replace(/{{(\d{1,3})}}/g, function(fullMatch, subMatch) {
+                return String.fromCharCode(subMatch);
+            });
+        }
+
+        /******************
+           DOM Traversal
+        ******************/
+
+        function wrapNode (node, opts) {
+            var wrapper = document.createElement(opts.tag);
+
+            /* Assign the element a class of "blast". */
+            wrapper.className = NAME;
+
+            /* If a custom class was provided, assign that too. */
+            if (opts.customClass) {
+                wrapper.className += " " + opts.customClass;
+
+                /* If an opts.customClass is provided, generate an ID consisting of customClass and a number indicating the match's iteration. */
+                if (opts.generateIndexID) {
+                    wrapper.id = opts.customClass + "-" + Element.blastedIndex;
+                }
+            }
+
+            /* For the "all" delimiter, prevent space characters from collapsing. */
+            if (opts.delimiter === "all" && /\s/.test(node.data)) {
+                wrapper.style.whiteSpace = "pre-line";
+            }
+
+            /* Assign the element a class equal to its escaped inner text. Only applicable to the character and word delimiters (since they do not contain spaces). */
+            if (opts.generateValueClass === true && !opts.search && (opts.delimiter === "character" || opts.delimiter === "word")) {
+                var valueClass,
+                    text = node.data;
+
+                /* For the word delimiter, remove adjoined punctuation, which is unlikely to be desired as part of the match -- unless the text
+                   consists solely of punctuation (e.g. "!!!"), in which case we leave the text as-is. */
+                if (opts.delimiter === "word" && Reg.onlyContainsPunctuation.test(text)) {
+                    /* E: Remove punctuation that's adjoined to either side of the word match. */
+                    text = text.replace(Reg.adjoinedPunctuation, "");
+                }
+
+                valueClass = NAME + "-" + opts.delimiter.toLowerCase() + "-" + text.toLowerCase();
+
+                wrapper.className += " " + valueClass;
+            }
+
+            /* Hide the wrapper elements from screenreaders now that we've set the target's aria-label attribute. */
+            if (opts.aria) {
+                wrapper.setAttribute("aria-hidden", "true");
+            }
+
+            wrapper.appendChild(node.cloneNode(false));
+
+            return wrapper;
+        }
+
+        function traverseDOM (node, opts) {
+            var matchPosition = -1,
+                skipNodeBit = 0;
+
+            /* Only proceed if the node is a text node and isn't empty. */
+            if (node.nodeType === 3 && node.data.length) {
+                /* Perform punctuation encoding/decoding once per original whole text node (before it gets split up into bits). */
+                if (Element.nodeBeginning) {
+                    /* For the sentence delimiter, we first escape likely false-positive sentence-final punctuation. For all other delimiters,
+                       we must decode the user's manually-escaped punctuation so that the RegEx can match correctly (without being thrown off by characters in {{ASCII}}). */
+                    node.data = (!opts.search && opts.delimiter === "sentence") ? encodePunctuation(node.data) : decodePunctuation(node.data);
+
+                    Element.nodeBeginning = false;
+                }
+
+                matchPosition = node.data.search(delimiterRegex);
+
+                /* If there's a RegEx match in this text node, proceed with element wrapping. */
+                if (matchPosition !== -1) {
+                    var match = node.data.match(delimiterRegex),
+                        matchText = match[0],
+                        subMatchText = match[1] || false;
+
+                    /* RegEx queries that can return empty strings (e.g ".*") produce an empty matchText which throws the entire traversal process into an infinite loop due to the position index not incrementing.
+                       Thus, we bump up the position index manually, resulting in a zero-width split at this location followed by the continuation of the traversal process. */
+                    if (matchText === "") {
+                        matchPosition++;
+                    /* If a RegEx submatch is produced that is not identical to the full string match, use the submatch's index position and text.
+                       This technique allows us to avoid writing multi-part RegEx queries for submatch finding. */
+                    } else if (subMatchText && subMatchText !== matchText) {
+                        matchPosition += matchText.indexOf(subMatchText);
+                        matchText = subMatchText;
+                    }
+
+                    /* Split this text node into two separate nodes at the position of the match, returning the node that begins after the match position. */
+                    var middleBit = node.splitText(matchPosition);
+
+                    /* Split the newly-produced text node at the end of the match's text so that middleBit is a text node that consists solely of the matched text. The other newly-created text node, which begins
+                       at the end of the match's text, is what will be traversed in the subsequent loop (in order to find additional matches in the containing text node). */
+                    middleBit.splitText(matchText.length);
+
+                    /* Over-increment the loop counter (see below) so that we skip the extra node (middleBit) that we've just created (and already processed). */
+                    skipNodeBit = 1;
+
+                    if (!opts.search && opts.delimiter === "sentence") {
+                        /* Now that we've forcefully escaped all likely false-positive sentence-final punctuation, we must decode the punctuation back from ASCII. */
+                        middleBit.data = decodePunctuation(middleBit.data);
+                    }
+
+                    /* Create the wrapped node. */
+                    var wrappedNode = wrapNode(middleBit, opts, Element.blastedIndex);
+                    /* Then replace the middleBit text node with its wrapped version. */
+                    middleBit.parentNode.replaceChild(wrappedNode, middleBit);
+
+                    /* Push the wrapper onto the Element.wrappers array (for later use with stack manipulation). */
+                    Element.wrappers.push(wrappedNode);
+
+                    Element.blastedIndex++;
+
+                    /* Note: We use this slow splice-then-iterate method because every match needs to be converted into an HTML element node. A text node's text cannot have HTML elements inserted into it. */
+                    /* TODO: To improve performance, use documentFragments to delay node manipulation so that DOM queries and updates can be batched across elements. */
+                }
+            /* Traverse the DOM tree until we find text nodes. Skip script and style elements. Skip select and textarea elements since they contain special text nodes that users would not want wrapped.
+               Additionally, check for the existence of our plugin's class to ensure that we do not retraverse elements that have already been blasted. */
+            /* Note: This basic DOM traversal technique is copyright Johann Burkard <http://johannburkard.de>. Licensed under the MIT License: http://en.wikipedia.org/wiki/MIT_License */
+            } else if (node.nodeType === 1 && node.hasChildNodes() && !Reg.skippedElements.test(node.tagName) && !Reg.hasPluginClass.test(node.className)) {
+                /* Note: We don't cache childNodes' length since it's a live nodeList (which changes dynamically with the use of splitText() above). */
+                for (var i = 0; i < node.childNodes.length; i++) {
+                    Element.nodeBeginning = true;
+
+                    i += traverseDOM(node.childNodes[i], opts);
+                }
+            }
+
+            return skipNodeBit;
+        }
+
+        /*******************
+           Call Variables
+        *******************/
+
+        var opts = $.extend({}, $.fn[NAME].defaults, options),
+            delimiterRegex,
+            /* Container for variables specific to each element targeted by the Blast call. */
+            Element = {};
+
+        /***********************
+           Delimiter Creation
+        ***********************/
+
+        /* Ensure that the opts.delimiter search variable is a non-empty string. */
+        if (opts.search.length && (typeof opts.search === "string" || /^\d/.test(parseFloat(opts.search)))) {
+            /* Since the search is performed as a Regex (see below), we escape the string's Regex meta-characters. */
+            opts.delimiter = opts.search.toString().replace(/[-[\]{,}(.)*+?|^$\\\/]/g, "\\$&");
+
+            /* Note: This matches the apostrophe+s of the phrase's possessive form: {PHRASE's}. */
+            /* Note: This will not match text that is part of a compound word (two words adjoined with a dash), e.g. "front" won't match inside "front-end". */
+            /* Note: Based on the way the search algorithm is implemented, it is not possible to search for a string that consists solely of punctuation characters. */
+            /* Note: By creating boundaries at Latin alphabet ranges instead of merely spaces, we effectively match phrases that are inlined alongside any type of non-Latin-letter,
+               e.g. word|, word!, ♥word♥ will all match. */
+            delimiterRegex = new RegExp("(?:^|[^-" + characterRanges.latinLetters + "])(" + opts.delimiter + "('s)?)(?![-" + characterRanges.latinLetters + "])", "i");
+        } else {
+            /* Normalize the string's case for the delimiter switch check below. */
+            if (typeof opts.delimiter === "string") {
+                opts.delimiter = opts.delimiter.toLowerCase();
+            }
+
+            switch (opts.delimiter) {
+                case "all":
+                    /* Matches every character then later sets spaces to "white-space: pre-line" so they don't collapse. */
+                    delimiterRegex = /(.)/;
+                    break;
+
+                case "letter":
+                case "char":
+                case "character":
+                    /* Matches every non-space character. */
+                    /* Note: This is the slowest delimiter. However, its slowness is only noticeable when it's used on larger bodies of text (of over 500 characters) on <=IE8.
+                       (Run Blast with opts.debug=true to monitor execution times.) */
+                    delimiterRegex = /(\S)/;
+                    break;
+
+                case "word":
+                    /* Matches strings in between space characters. */
+                    /* Note: Matches will include any punctuation that's adjoined to the word, e.g. "Hey!" will be a full match. */
+                    /* Note: Remember that, with Blast, every HTML element marks the start of a brand new string. Hence, "in<b>si</b>de" matches as three separate words. */
+                    delimiterRegex = /\s*(\S+)\s*/;
+                    break;
+
+                case "sentence":
+                    /* Matches phrases either ending in Latin alphabet punctuation or located at the end of the text. (Linebreaks are not considered punctuation.) */
+                    /* Note: If you don't want punctuation to demarcate a sentence match, replace the punctuation character with {{ASCII_CODE_FOR_DESIRED_PUNCTUATION}}. ASCII codes: .={{46}}, ?={{63}}, !={{33}} */
+                    delimiterRegex = /(?=\S)(([.]{2,})?[^!?]+?([.…!?]+|(?=\s+$)|$)(\s*[′’'”″“")»]+)*)/;
+                    /* RegExp explanation (Tip: Use Regex101.com to play around with this expression and see which strings it matches):
+                       - Expanded view: /(?=\S) ( ([.]{2,})? [^!?]+? ([.…!?]+|(?=\s+$)|$) (\s*[′’'”″“")»]+)* )
+                       - (?=\S) --> Match must contain a non-space character.
+                       - ([.]{2,})? --> Match may begin with a group of periods.
+                       - [^!?]+? --> Grab everything that isn't an unequivocally-terminating punctuation character, but stop at the following condition...
+                       - ([.…!?]+|(?=\s+$)|$) --> Match the last occurrence of sentence-final punctuation or the end of the text (optionally with left-side trailing spaces).
+                       - (\s*[′’'”″“")»]+)* --> After the final punctuation, match any and all pairs of (optionally space-delimited) quotes and parentheses.
+                    */
+                    break;
+
+                case "element":
+                    /* Matches text between HTML tags. */
+                    /* Note: Wrapping always occurs inside of elements, i.e. <b><span class="blast">Bolded text here</span></b>. */
+                    delimiterRegex = /(?=\S)([\S\s]*\S)/;
+                    break;
+
+                /*****************
+                   Custom Regex
+                *****************/
+
+                default:
+                    /* You can pass in /your-own-regex/. */
+                    if (opts.delimiter instanceof RegExp) {
+                        delimiterRegex = opts.delimiter;
+                    } else {
+                        console.log(NAME + ": Unrecognized delimiter, empty search string, or invalid custom Regex. Aborting.");
+
+                        /* Abort this Blast call. */
+                        return true;
+                    }
+            }
+        }
+
+        /**********************
+           Element Iteration
+        **********************/
+
+        this.each(function() {
+            var $this = $(this),
+                text = $this.text();
+
+            /* When anything except false is passed in for the options object, Blast is initiated. */
+            if (options !== false) {
+
+                /**********************
+                   Element Variables
+                **********************/
+
+                Element = {
+                    /* The index of each wrapper element generated by blasting. */
+                    blastedIndex: 0,
+                    /* Whether we're just entering this node. */
+                    nodeBeginning: false,
+                    /* Keep track of the elements generated by Blast so that they can (optionally) be pushed onto the jQuery call stack. */
+                    wrappers: Element.wrappers || []
+                };
+
+                /*****************
+                   Housekeeping
+                *****************/
+
+                /* Unless a consecutive opts.search is being performed, an element's existing Blast call is reversed before proceeding. */
+                if ($this.data(NAME) !== undefined && ($this.data(NAME) !== "search" || opts.search === false)) {
+                    reverse($this, opts);
+
+                    if (opts.debug) console.log(NAME + ": Removed element's existing Blast call.");
+                }
+
+                /* Store the current delimiter type so that it can be compared against on subsequent calls (see above). */
+                $this.data(NAME, opts.search !== false ? "search" : opts.delimiter);
+
+                if (opts.aria) {
+                    $this.attr("aria-label", text);
+                }
+
+                /****************
+                   Preparation
+                ****************/
+
+                /* Perform optional HTML tag stripping. */
+                if (opts.stripHTMLTags) {
+                    $this.html(text);
+                }
+
+                /* If the browser throws an error for the provided element type (browers whitelist the letters and types of the elements they accept), fall back to using "span". */
+                try {
+                    document.createElement(opts.tag);
+                } catch (error) {
+                    opts.tag = "span";
+
+                    if (opts.debug) console.log(NAME + ": Invalid tag supplied. Defaulting to span.");
+                }
+
+                /* For reference purposes when reversing Blast, assign the target element a root class. */
+                $this.addClass(NAME + "-root");
+
+                /* Initiate the DOM traversal process. */
+                if (opts.debug) console.time(NAME);
+                traverseDOM(this, opts);
+                if (opts.debug) console.timeEnd(NAME);
+
+            /* If false is passed in as the first parameter, reverse Blast. */
+            } else if (options === false && $this.data(NAME) !== undefined) {
+                reverse($this, opts);
+            }
+
+            /**************
+               Debugging
+            **************/
+
+            /* Output the full string of each wrapper element and color alternate the wrappers. This is in addition to the performance timing that has already been outputted. */
+            if (opts.debug) {
+                $.each(Element.wrappers, function(index, element) {
+                    console.log(NAME + " [" + opts.delimiter + "] " + this.outerHTML);
+                    this.style.backgroundColor = index % 2 ? "#f12185" : "#075d9a";
+                });
+            }
+        });
+
+        /************
+           Reverse
+        ************/
+
+        function reverse ($this, opts) {
+            if (opts.debug) console.time("blast reversal");
+
+            var skippedDescendantRoot = false;
+
+            $this
+                .removeClass(NAME + "-root")
+                .removeAttr("aria-label")
+                .find("." + NAME)
+                    .each(function () {
+                        var $this = $(this);
+                        /* Do not reverse Blast on descendant root elements. (Before you can reverse Blast on an element, you must reverse Blast on any parent elements that have been Blasted.) */
+                        if (!$this.closest("." + NAME + "-root").length) {
+                            var thisParentNode = this.parentNode;
+
+                            /* This triggers some sort of node layout, thereby solving a node normalization bug in <=IE7 for reasons unknown. If you know the specific reason, tweet me: @Shapiro. */
+                            if (IE <= 7) (thisParentNode.firstChild.nodeName);
+
+                            /* Strip the HTML tags off of the wrapper elements by replacing the elements with their child node's text. */
+                            thisParentNode.replaceChild(this.firstChild, this);
+
+                            /* Normalize() parents to remove empty text nodes and concatenate sibling text nodes. (This cleans up the DOM after our manipulation.) */
+                            thisParentNode.normalize();
+                        } else {
+                            skippedDescendantRoot = true;
+                        }
+                    });
+
+            /* Zepto core doesn't include cache-based $.data(), so we mimic data-attr removal by setting it to undefined. */
+            if (window.Zepto) {
+                $this.data(NAME, undefined);
+            } else {
+                $this.removeData(NAME);
+            }
+
+            if (opts.debug) {
+                console.log(NAME + ": Reversed Blast" + ($this.attr("id") ? " on #" + $this.attr("id") + "." : ".") + (skippedDescendantRoot ? " Skipped reversal on the children of one or more descendant root elements." : ""));
+                console.timeEnd("blast reversal");
+            }
+        }
+
+        /*************
+            Chain
+        *************/
+
+        /* Either return a stack composed of our call's Element.wrappers or return the element(s) originally targeted by the Blast call. */
+        /* Note: returnGenerated can only be disabled on a per-call basis (not a per-element basis). */
+        if (options !== false && opts.returnGenerated === true) {
+            /* A reimplementation of jQuery's $.pushStack() (since Zepto does not provide this function). */
+            var newStack = $().add(Element.wrappers);
+            newStack.prevObject = this;
+            newStack.context = this.context;
+
+            return newStack;
+        } else {
+            return this;
+        }
+    };
+
+    /***************
+        Defaults
+    ***************/
+
+    $.fn.blast.defaults = {
+        returnGenerated: true,
+        delimiter: "word",
+        tag: "span",
+        search: false,
+        customClass: "",
+        generateIndexID: false,
+        generateValueClass: false,
+        stripHTMLTags: false,
+        aria: true,
+        debug: false
+    };
+})(window, document);
+
+/*****************
+   Known Issues
+*****************/
+
+/* In <=IE7, when Blast is called on the same element more than once with opts.stripHTMLTags=false, calls after the first may not target the entirety of the element and/or may
+   inject excess spacing between inner text parts due to <=IE7's faulty node normalization. */
+
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -28165,10 +28357,10 @@ return jQuery;
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(6)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6), __webpack_require__(7)(module)))
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports) {
 
 var g;
@@ -28195,7 +28387,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -28220,190 +28412,6 @@ module.exports = function(module) {
 	}
 	return module;
 };
-
-
-/***/ }),
-/* 7 */,
-/* 8 */
-/***/ (function(module, exports) {
-
-// Courtesy https://github.com/Alir3z4/stop-words/blob/master/english.txt
-
-module.exports =
-['a',
- 'about',
- 'above',
- 'after',
- 'again',
- 'against',
- 'all',
- 'am',
- 'an',
- 'and',
- 'any',
- 'are',
- "aren't",
- 'as',
- 'at',
- 'be',
- 'because',
- 'been',
- 'before',
- 'being',
- 'below',
- 'between',
- 'both',
- 'but',
- 'by',
- "can't",
- 'cannot',
- 'could',
- "couldn't",
- 'did',
- "didn't",
- 'do',
- 'does',
- "doesn't",
- 'doing',
- "don't",
- 'down',
- 'during',
- 'each',
- 'few',
- 'for',
- 'from',
- 'further',
- 'had',
- "hadn't",
- 'has',
- "hasn't",
- 'have',
- "haven't",
- 'having',
- 'he',
- "he'd",
- "he'll",
- "he's",
- 'her',
- 'here',
- "here's",
- 'hers',
- 'herself',
- 'him',
- 'himself',
- 'his',
- 'how',
- "how's",
- 'i',
- "i'd",
- "i'll",
- "i'm",
- "i've",
- 'if',
- 'in',
- 'into',
- 'is',
- "isn't",
- 'it',
- "it's",
- 'its',
- 'itself',
- "let's",
- 'me',
- 'more',
- 'most',
- "mustn't",
- 'my',
- 'myself',
- 'no',
- 'nor',
- 'not',
- 'of',
- 'off',
- 'on',
- 'once',
- 'only',
- 'or',
- 'other',
- 'ought',
- 'our',
- 'ours',
- 'ourselves',
- 'out',
- 'over',
- 'own',
- 'same',
- "shan't",
- 'she',
- "she'd",
- "she'll",
- "she's",
- 'should',
- "shouldn't",
- 'so',
- 'some',
- 'such',
- 'than',
- 'that',
- "that's",
- 'the',
- 'their',
- 'theirs',
- 'them',
- 'themselves',
- 'then',
- 'there',
- "there's",
- 'these',
- 'they',
- "they'd",
- "they'll",
- "they're",
- "they've",
- 'this',
- 'those',
- 'through',
- 'to',
- 'too',
- 'under',
- 'until',
- 'up',
- 'very',
- 'was',
- "wasn't",
- 'we',
- "we'd",
- "we'll",
- "we're",
- "we've",
- 'were',
- "weren't",
- 'what',
- "what's",
- 'when',
- "when's",
- 'where',
- "where's",
- 'which',
- 'while',
- 'who',
- "who's",
- 'whom',
- 'why',
- "why's",
- 'with',
- "won't",
- 'would',
- "wouldn't",
- 'you',
- "you'd",
- "you'll",
- "you're",
- "you've",
- 'your',
- 'yours',
- 'yourself',
- 'yourselves']
 
 
 /***/ })

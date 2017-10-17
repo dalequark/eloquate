@@ -70,7 +70,9 @@ function runAnalysis() {
     return {
       "message" : ("'" + word + "' was used " +
       info.getFrequency(word) + " times."),
-      "indices" : info.getIndices(word)
+      "indices" : info.getIndices(word),
+      "type" : "repeat",
+      "val" : info.getFrequency(word)
     }
   });
 
@@ -83,7 +85,9 @@ function runAnalysis() {
         "message" : "Word '" +
         info.wordAtIndex(indices[0]) + "' was repeated " +
         (indices[1] - indices[0]) + " words away",
-        "indices" : indices
+        "indices" : indices,
+        "type" : "too_close",
+        "val" : (indices[1] - indices[0])
       }
     })
   );
@@ -103,7 +107,12 @@ function updateView() {
   $('#word_count').text("Word Count: " + info.wordCount());
 
   $("#issue_queue").empty();
-  issue_queue.forEach((issue) => {
+
+  let this_queue = _.sortBy(issue_queue, (x) => {
+    return x.type == "repeat" ? 0 - x.val : x.val;
+  });
+
+  this_queue.forEach((issue) => {
     $("#issue_queue").append("<p class='issue'>" + issue['message'] + "</p>");
   });
 }
