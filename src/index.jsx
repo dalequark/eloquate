@@ -5,11 +5,27 @@ import _ from 'lodash';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import { essay } from './reducers';
+import App from './components/App';
+
+let store = createStore(essay);
 
 ReactDOM.render(
-  <h1>Hello, world!</h1>,
-  document.getElementById('root')
+  <Provider store={store}>
+     <App/>
+   </Provider>,
+   document.getElementById('root')
 );
+
+
+
+
+
+
+
+
 
 const debounce = 1000;
 const default_min_freq = 5;
