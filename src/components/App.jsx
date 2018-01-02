@@ -4,12 +4,24 @@ import EssayInput from './EssayInput';
 export default class App extends React.Component {
 
   render() {
-
-    let words = "Hello this is a test test test".split(" ");
-    words = words.map((word) => {
-      return { name: word, rules: ["frequent", "too_close"] };
-    });
-    return <EssayInput words={words}/>
+    return <EssayInput />
   }
 
 }
+
+// TODO: learn redux
+// import { connect } from 'react-redux';
+// let mapStateToProps = state => ({
+//   text: state.text
+// });
+//
+// let mapDispatchToProps = dispatch => ({
+//   changeText: (text) => dispatch({
+//     type: 'TEXT_CHANGED',
+//     text,
+//   })
+// });
+//
+// export default connect(
+// 	mapStateToProps, mapDispatchToProps
+// )(App);

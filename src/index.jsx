@@ -5,27 +5,21 @@ import _ from 'lodash';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
-import { essay } from './reducers';
 import App from './components/App';
 
-let store = createStore(essay);
+// TODO: learn redux
+// import { createStore } from 'redux';
+// import { Provider } from 'react-redux';
+// import reducer from './reducer';
+// let store = createStore(reducer);
+// ReactDOM.render(
+//   <Provider store={store}>
+//      <App />
+//    </Provider>,
+//    document.getElementById('root')
+// );
 
-ReactDOM.render(
-  <Provider store={store}>
-     <App/>
-   </Provider>,
-   document.getElementById('root')
-);
-
-
-
-
-
-
-
-
+ReactDOM.render(<App />, document.getElementById('root'));
 
 const debounce = 1000;
 const default_min_freq = 5;
@@ -40,7 +34,7 @@ if(TextAnalysis.stop_words.length) {
     $('#stop_words').text(TextAnalysis.stop_words.join(', '));
 }
 
-update();
+// update();
 
 
 /* ----- */
@@ -146,6 +140,7 @@ $("#config_button").on("click", function() {
 });
 
 // Let the timeout wait for you to finish typing
+/*
 let timeout;
 $("#text_input").on("input", function() {
   clearTimeout(timeout);
@@ -168,3 +163,4 @@ $("#stop_words").on("input", function() {
   clearTimeout(timeout);
   timeout = setTimeout(update, debounce);
 });
+*/

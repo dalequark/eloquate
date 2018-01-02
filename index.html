@@ -1,13 +1,15 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
     <title>Eloquate</title>
   <link rel="stylesheet" href="stylesheet.css" type="text/css">
+  <link rel="stylesheet" href="./node_modules/draft-js/dist/Draft.css" type="text/css">
   </head>
   <body>
     <div id="root"></div>
-    
+
     <div id="summary_statistics" class="simple_box">
 
       <h2>Summary</h2>
@@ -16,7 +18,7 @@
           <div class="label"># Repeats</div>
           <div class="config_item" id="min_freq" contenteditable="true">5</div>
           <div class="label">Repeat Distance</div>
-          <div class="config_item"
+          <div class="config_item">
             id="repeat_distance"
             contenteditable="true" >10</div>
 
@@ -29,13 +31,6 @@
         <div id='issue_queue'>
       </div>
     </div>
-
-
-  <div id="text_input" class="simple_box" contenteditable="true">
-    Paste your text here! Words that are repeated too many times will
-    turn pink. Words that are repeated within a short distance of each
-    other will turn blue ... blue.
-  </div>
 
   </body>
   <script src="./dist/bundle.js"></script>
